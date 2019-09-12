@@ -53,7 +53,7 @@ def choose_filter():
 	
 def reversify():
 	filename = str(Path.home()) + "/.bashrc"
-	os.system("cd .. && mv usr/etc/motdback usr/etc/motd ")
+	os.system("cd $HOME && cd .. && mv usr/etc/motdback usr/etc/motd ")
 	os.remove(filename)
 	print("Please sip your coffee as winter works his magic -*-*-")
 	
