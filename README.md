@@ -4,6 +4,7 @@ Make your  name appear on your  termux  the  scripty way:ghost:
 ```bash
 $ git clone https://github.com/W1nterFr3ak/ParotiFyTermuX.git
 $ cd ParotiFyTermuX
+$ python3 installer.py
 $ python3 termuxshell.py
 ```
 usage: termuxshell.py [-h] [--parotify] [--revert]
