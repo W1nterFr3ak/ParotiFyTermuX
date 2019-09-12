@@ -1,2 +1,2 @@
 import os
-os.system("pkg update && pkg upgrade && pkg install toilet")
+os.system("pkg update && pkg upgrade && pkg install toilet ruby lolcat")

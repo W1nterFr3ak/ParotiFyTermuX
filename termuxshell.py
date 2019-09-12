@@ -22,13 +22,15 @@ def TermColor(name, filt):
 	fonts = ["banner","big","block","bubble","digital","ivrit","mini","script","shadow","slant","small","smscript","smshadow","smslant","standard"]
 	random.shuffle(fonts)
 	try:
-		os.system("cd $HOME && cd ..  && mv usr/etc/motd usr/etc/motdback ")
+		open("/data/data/com.termux/files/usr/etc/motd")
+		os.system("cd $HOME && cd ..  && && mv usr/etc/motd usr/etc/motdback ")
 	except FileNotFoundError as e:
 		print("Clear  Screen already set")
 	filename = str(Path.home()) + "/.bashrc"
 	
 	new = open(filename, "w+")
-	new.write(f"""toilet -f {fonts[random.randint(0, len(fonts)-1)]} --{filt} {name} -t
+	new.write(f"""toilet -f {fonts[random.randint(0, len(fonts)-1)]} --{filt} {name} -t | lolcat
+date '+%D%n%T'
 PS1='\033[01;34m\]┌──\[\033[01;32m\]root\[\033[01;34m\]@\[\033[01;31m\]\h\[\033[00;34m\]\[\033[01;34m\]\w\[\033[00;34m\]\[\033[01;32m\]:
 \[\033[01;34m\]└╼\[\033[01;31m\]#\[\033[01;32m\]'
 """)
