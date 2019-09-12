@@ -19,7 +19,7 @@ def get_parser():
 	return parser
 	
 def TermColor(name):
-	os.system("cd $HOME && pkg update && pkg upgrade && pkg install figlet ")
+	os.system("cd .. && pkg update && pkg upgrade && pkg install figlet && mv usr/etc/motd usr/etc/motdback ")
 	filename = str(Path.home()) + "/.bashrc"
 	new = open(filename, "w+")
 	new.write(f"""figlet -f slant {name}
@@ -45,7 +45,7 @@ PS1='\033[01;34m\]┌──\[\033[01;32m\]root\[\033[01;34m\]@\[\033[01;31m\]\h\
 	
 def reversify():
 	filename = str(Path.home()) + "/.bashrc"
-	#os.system("cd $HOME && rm .barshrc")
+	os.system("cd .. && mv usr/etc/motdback usr/etc/motd ")
 	os.remove(filename)
 	print("Please sip your coffee as winter works his magic -*-*-")
 	
