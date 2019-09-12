@@ -28,10 +28,10 @@ def TermColor(name, filt):
 PS1='\033[01;34m\]┌──\[\033[01;32m\]root\[\033[01;34m\]@\[\033[01;31m\]\h\[\033[00;34m\]\[\033[01;34m\]\w\[\033[00;34m\]\[\033[01;32m\]:
 \[\033[01;34m\]└╼\[\033[01;31m\]#\[\033[01;32m\]'
 """)
-	new.close()
-	print("Please sip your coffee as winter works his magic -*-*-")
+	print("\n\n")
+	os.system('echo "\\e[1;32m Please sip your coffee as winter works his magic -*-*- \\e[0m"')
 	try:
-		os.system('echo "\\e[1;32m[-] Parrotify was succesfull, closing terminl  ctrl + c  to abort  \\e[0m"')
+		os.system('echo "\\e[1;32m[-] Parrotify was succesfull, closing terminal  ctrl + c  to abort  \\e[0m"')
 		time.sleep(10)
 		try:
 			os.kill(os.getppid(), signal.SIGHUP)
@@ -55,7 +55,8 @@ def reversify():
 	filename = str(Path.home()) + "/.bashrc"
 	os.system("cd $HOME && cd .. && mv usr/etc/motdback usr/etc/motd ")
 	os.remove(filename)
-	print("Please sip your coffee as winter works his magic -*-*-")
+	print("\n\n")
+	os.system('echo "\\e[1;32m Please sip your coffee as winter works his magic -*-*- \\e[0m"')
 	
 	print('\n\n')
 	try:
@@ -107,6 +108,7 @@ def main():
 				TermColor(name, form)
 			elif form == '2':
 				form = 'metal'
+				TermColor(name, form)
 			elif form.lower == "q":
 				sys.exit()
 			else:
