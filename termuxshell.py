@@ -21,7 +21,7 @@ def get_parser():
 def TermColor(name, filt):
 	fonts = ["banner","big","block","bubble","digital","ivrit","mini","script","shadow","slant","small","smscript","smshadow","smslant","standard"]
 	random.shuffle(fonts)
-	os.system("cd .. && pkg update && pkg upgrade && pkg install figlet toilet && mv usr/etc/motd usr/etc/motdback ")
+	os.system("cd .. && pkg update && pkg upgrade && pkg install toilet && mv usr/etc/motd usr/etc/motdback ")
 	filename = str(Path.home()) + "/.bashrc"
 	new = open(filename, "w+")
 	new.write(f"""toilet -f {fonts} --filter {filt} {name} -t date '+%D%n%T
