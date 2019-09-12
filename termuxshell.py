@@ -24,7 +24,7 @@ def TermColor(name, filt):
 	os.system("cd $HOME && cd .. && pkg update && pkg upgrade && pkg install toilet && mv usr/etc/motd usr/etc/motdback ")
 	filename = str(Path.home()) + "/.bashrc"
 	new = open(filename, "w+")
-	new.write(f"""toilet -t -f {fonts[random.randint(0, len(fonts)-1)]} --filter {filt} {name}
+	new.write(f"""toilet -f {fonts[random.randint(0, len(fonts)-1)]} --{filt} {name} -t
 PS1='\033[01;34m\]┌──\[\033[01;32m\]root\[\033[01;34m\]@\[\033[01;31m\]\h\[\033[00;34m\]\[\033[01;34m\]\w\[\033[00;34m\]\[\033[01;32m\]:
 \[\033[01;34m\]└╼\[\033[01;31m\]#\[\033[01;32m\]'
 """)
@@ -77,7 +77,7 @@ def main():
 	random.shuffle(fonts)
 	os.system("clear")
 	os.system('echo  "\\e[1;31m\"')
-	os.system(f"toilet -t -f {fonts[random.randint(0, len(fonts)-1)]} --filter gay  PAR0tifyTerm   ")
+	os.system(f"toilet -t -f {fonts[random.randint(0, len(fonts)-1)]} --gay  PAR0tifyTerm   ")
 	os.system('echo "\\e[1;32m\"')
 	os.system('echo "\\e[1;32m\"')
 	os.system('echo "\\e[1;34m          Created By W1nterFr3ak\\e[0m"')
@@ -102,16 +102,17 @@ def main():
 		if len(name) > 0:
 			form = choose_filter()
 			
-			if str(form) == 1:
-				form == 'gay'
+			if form == '1':
+				form = 'gay'
 				TermColor(name, form)
-			elif str(form) == 1:
-				form == 'gay'
-			elif str(form).lower == "q":
+			elif form == '2':
+				form = 'metal'
+			elif form.lower == "q":
 				sys.exit()
 			else:
 				print("Using option one")
-				TermColor("gay",  form)		
+				form =  "gay"
+				TermColor(name,  form)		
 		else:
 			os.system('echo "\\e[1;32m !!! Please rerun the  script and input the name to be displayed!!! \\e[0m"')
 			sys.exit(1)
