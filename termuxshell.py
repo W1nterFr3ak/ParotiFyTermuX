@@ -18,11 +18,13 @@ def get_parser():
 					action="store_true")
 	return parser
 	
-def TermColor(name):
-	os.system("cd .. && pkg update && pkg upgrade && pkg install figlet && mv usr/etc/motd usr/etc/motdback ")
+def TermColor(name, filt):
+	fonts = ["banner","big","block","bubble","digital","ivrit","mini","script","shadow","slant","small","smscript","smshadow","smslant","standard"]
+	random.shuffle(fonts)
+	os.system("cd .. && pkg update && pkg upgrade && pkg install figlet toilet && mv usr/etc/motd usr/etc/motdback ")
 	filename = str(Path.home()) + "/.bashrc"
 	new = open(filename, "w+")
-	new.write(f"""figlet -f slant {name}
+	new.write(f"""toilet -f {fonts} --filter {filt} {name} -t date '+%D%n%T
 PS1='\033[01;34m\]┌──\[\033[01;32m\]root\[\033[01;34m\]@\[\033[01;31m\]\h\[\033[00;34m\]\[\033[01;34m\]\w\[\033[00;34m\]\[\033[01;32m\]:
 \[\033[01;34m\]└╼\[\033[01;31m\]#\[\033[01;32m\]'
 """)
@@ -42,6 +44,12 @@ PS1='\033[01;34m\]┌──\[\033[01;32m\]root\[\033[01;34m\]@\[\033[01;31m\]\h\
 		time.sleep(3)
 	
 	
+def choose_filter():
+	print(" 1) gay: add a rainbow colour effect")
+	print(" 2) metal: add a metallic colour effect")
+	form = name = input("Enter filter number default(1) :")
+	
+	return form
 	
 def reversify():
 	filename = str(Path.home()) + "/.bashrc"
@@ -87,9 +95,23 @@ def main():
 		parser.print_help()
 		
 	elif parrot:
+		
 		name = input("Enter name to be displayed in termux :")
+		
+		
 		if len(name) > 0:
-			TermColor(name)
+			form = choose_filter()
+			
+			if str(form) == 1:
+				form == 'gay'
+				TermColor(name, form)
+			elif str(form) == 1:
+				form == 'gay'
+			elif str(form).lower == "q":
+				sys.exit()
+			else:
+				print("Using option one")
+				TermColor("gay",  form)		
 		else:
 			os.system('echo "\\e[1;32m !!! Please rerun the  script and input the name to be displayed!!! \\e[0m"')
 			sys.exit(1)
