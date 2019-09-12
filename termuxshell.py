@@ -45,8 +45,10 @@ PS1='\033[01;34m\]┌──\[\033[01;32m\]root\[\033[01;34m\]@\[\033[01;31m\]\h\
 	
 	
 def choose_filter():
-	print(" 1) gay: add a rainbow colour effect")
-	print(" 2) metal: add a metallic colour effect")
+	print("\n\n")
+	os.system('echo "\\e[1;34m 3)  1) gay: add a rainbow colour effect\\e[0m"')
+	os.system('echo "\\e[1;34m 3)  2) metal: add a metallic colour effect\\e[0m"')
+	print("\n\n")
 	form = name = input("Enter filter number default(1) :")
 	
 	return form
