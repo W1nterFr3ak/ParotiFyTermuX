@@ -21,8 +21,12 @@ def get_parser():
 def TermColor(name, filt):
 	fonts = ["banner","big","block","bubble","digital","ivrit","mini","script","shadow","slant","small","smscript","smshadow","smslant","standard"]
 	random.shuffle(fonts)
-	os.system("cd $HOME && cd .. && pkg update && pkg upgrade && pkg install toilet && mv usr/etc/motd usr/etc/motdback ")
+	try:
+		os.system("cd $HOME && cd .. && pkg update && pkg upgrade && pkg install toilet && mv usr/etc/motd usr/etc/motdback ")
+	except FileNotFoundError as e:
+		print("Clear  Screen already set")
 	filename = str(Path.home()) + "/.bashrc"
+	
 	new = open(filename, "w+")
 	new.write(f"""toilet -f {fonts[random.randint(0, len(fonts)-1)]} --{filt} {name} -t
 PS1='\033[01;34m\]┌──\[\033[01;32m\]root\[\033[01;34m\]@\[\033[01;31m\]\h\[\033[00;34m\]\[\033[01;34m\]\w\[\033[00;34m\]\[\033[01;32m\]:
@@ -56,7 +60,10 @@ def choose_filter():
 def reversify():
 	filename = str(Path.home()) + "/.bashrc"
 	os.system("cd $HOME && cd .. && mv usr/etc/motdback usr/etc/motd ")
-	os.remove(filename)
+	try:
+		os.remove(filename)
+	except FileNotFoundError as e:
+		os.system('echo "\\e[1;32m !!! Your termux is completely normal!!! \\e[0m"')
 	print("\n\n")
 	os.system('echo "\\e[1;32m Please sip your coffee as winter works his magic -*-*- \\e[0m"')
 	
