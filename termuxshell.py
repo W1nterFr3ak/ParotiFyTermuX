@@ -19,7 +19,7 @@ def get_parser():
 	return parser
 	
 def TermColor(name):
-	#os.system("cd $HOME && pkg update && pkg upgrade && pkg install figlet ")
+	os.system("cd $HOME && pkg update && pkg upgrade && pkg install figlet ")
 	filename = str(Path.home()) + "/.bashrc"
 	new = open(filename, "w+")
 	new.write(f"""figlet -f slant {name}
