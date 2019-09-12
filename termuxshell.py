@@ -77,7 +77,7 @@ def main():
 	random.shuffle(fonts)
 	os.system("clear")
 	os.system('echo  "\\e[1;31m\"')
-	os.system(f"toilet -t -f {fonts[random.randint(0, len(fonts)-1)]} --filter gay  {name}    PAR0tifyTerm   ")
+	os.system(f"toilet -t -f {fonts[random.randint(0, len(fonts)-1)]} --filter gay  PAR0tifyTerm   ")
 	os.system('echo "\\e[1;32m\"')
 	os.system('echo "\\e[1;32m\"')
 	os.system('echo "\\e[1;34m          Created By W1nterFr3ak\\e[0m"')
