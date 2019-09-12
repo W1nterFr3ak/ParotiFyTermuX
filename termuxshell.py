@@ -51,7 +51,7 @@ def reversify():
 	
 	print('\n\n')
 	try:
-		os.system('echo "\\e[1;32m[-] Reversing Parrotify was succesful, losing terminl  ctrl + c  to abort  \\e[0m"')
+		os.system('echo "\\e[1;32m[-] Reversing Parrotify was succesful, closing terminl  ctrl + c  to abort  \\e[0m"')
 		time.sleep(10)
 		try:
 			os.kill(os.getppid(), signal.SIGHUP)
