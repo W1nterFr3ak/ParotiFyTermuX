@@ -30,7 +30,6 @@ def TermColor(name, filt):
 	
 	new = open(filename, "w+")
 	new.write(f"""toilet -f {fonts[random.randint(0, len(fonts)-1)]} --{filt} {name} -t | lolcat
-date '+%D%n%T'
 PS1='\033[01;34m\]┌──\[\033[01;32m\]root\[\033[01;34m\]@\[\033[01;31m\]\h\[\033[00;34m\]\[\033[01;34m\]\w\[\033[00;34m\]\[\033[01;32m\]:
 \[\033[01;34m\]└╼\[\033[01;31m\]#\[\033[01;32m\]'
 """)
