@@ -22,7 +22,7 @@ def TermColor(name, filt):
 	fonts = ["banner","big","block","bubble","digital","ivrit","mini","script","shadow","slant","small","smscript","smshadow","smslant","standard"]
 	random.shuffle(fonts)
 	try:
-		os.system("cd $HOME && cd .. && pkg update && pkg upgrade && pkg install toilet && mv usr/etc/motd usr/etc/motdback ")
+		os.system("cd $HOME && cd ..  && mv usr/etc/motd usr/etc/motdback ")
 	except FileNotFoundError as e:
 		print("Clear  Screen already set")
 	filename = str(Path.home()) + "/.bashrc"
