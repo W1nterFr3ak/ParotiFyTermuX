@@ -23,7 +23,7 @@ def TermColor(name, filt):
 	random.shuffle(fonts)
 	try:
 		open("/data/data/com.termux/files/usr/etc/motd")
-		os.system("cd $HOME && cd ..  && && mv usr/etc/motd usr/etc/motdback ")
+		os.system("cd $HOME && cd .. && mv usr/etc/motd usr/etc/motdback ")
 	except FileNotFoundError as e:
 		print("Clear  Screen already set")
 	filename = str(Path.home()) + "/.bashrc"
