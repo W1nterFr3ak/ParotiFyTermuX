@@ -24,7 +24,7 @@ def TermColor(name, filt):
 	os.system("cd .. && pkg update && pkg upgrade && pkg install toilet && mv usr/etc/motd usr/etc/motdback ")
 	filename = str(Path.home()) + "/.bashrc"
 	new = open(filename, "w+")
-	new.write(f"""toilet -f {fonts} --filter {filt} {name} -t date '+%D%n%T
+	new.write(f"""toilet -t -f {fonts[random.randint(0, len(fonts)-1)]} --filter {filt} {name}
 PS1='\033[01;34m\]┌──\[\033[01;32m\]root\[\033[01;34m\]@\[\033[01;31m\]\h\[\033[00;34m\]\[\033[01;34m\]\w\[\033[00;34m\]\[\033[01;32m\]:
 \[\033[01;34m\]└╼\[\033[01;31m\]#\[\033[01;32m\]'
 """)
@@ -77,7 +77,7 @@ def main():
 	random.shuffle(fonts)
 	os.system("clear")
 	os.system('echo  "\\e[1;31m\"')
-	os.system(f"figlet -c -f {fonts[random.randint(0, len(fonts)-1)]}    PAR0tifyTerm   ")
+	os.system(f"toilet -t -f {fonts[random.randint(0, len(fonts)-1)]} --filter gay  {name}    PAR0tifyTerm   ")
 	os.system('echo "\\e[1;32m\"')
 	os.system('echo "\\e[1;32m\"')
 	os.system('echo "\\e[1;34m          Created By W1nterFr3ak\\e[0m"')
