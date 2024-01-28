@@ -1,5 +1,5 @@
 # ParotiFyTermuX
-Make your name appear on your  termux and have parot os look the  scripty way:ghost:
+Make your name appear on your  termux and have parrot os like look .. the  scripty way:ghost:
 ***Parrot OS is awesome ,,***
 ```bash
 $ git clone https://github.com/W1nterFr3ak/ParotiFyTermuX.git
