@@ -156,7 +156,28 @@ def choose_font(available_fonts):
 def TermColor(name, filt):
     """Apply terminal customization with centered text and user-selected or random font"""
     if is_parrotified():
-        reversify()
+        try:
+            if os.path.exists(motd_backup):
+                os.system(f"mv {motd_backup} {motd_path}")
+                print("\033[1;32mRestored MOTD from {}\033[0m".format(motd_backup))
+            elif os.path.exists(motd_path):
+                print("\033[1;32mMOTD already in place\033[0m")
+            else:
+                print("\033[1;36mNo MOTD backup found\033[0m")
+        except Exception as e:
+            print(f"\033[1;33mCould not restore MOTD: {e}\033[0m")
+        try:
+            if os.path.exists(backup_file):
+                os.system(f"mv {backup_file} {filename}")
+                #print("\033[1;32mRestored .bashrc from {}\033[0m".format(backup_file))
+            elif os.path.exists(filename):
+                os.remove(filename)
+                #print("\033[1;32mRemoved custom .bashrc\033[0m")
+                #else:
+                #print("\033[1;32mNo custom .bashrc found\033[0m")
+            print("\033[1;32mParrotify Removed Terminal Restored\033[0m")
+        except OSError as e:
+            print(f"\033[1;33mError handling .bashrc: {e}\033[0m")
     
     available_fonts = get_available_fonts()
     
