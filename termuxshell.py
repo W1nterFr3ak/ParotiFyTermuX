@@ -6,6 +6,7 @@ import argparse
 from pathlib import Path
 import re
 import random
+import subprocess
 
 def get_parser():
     parser = argparse.ArgumentParser(description='Parrotify Terminal - Make your terminal look like Parrot OS')
@@ -15,7 +16,7 @@ def get_parser():
     return parser
 
 def get_available_fonts():
-    """Get list of available toilet fonts by checking the figlet font directory"""
+    """Get list of available toilet fonts with timeout to prevent hanging"""
     font_dir = "/data/data/com.termux/files/usr/share/figlet/" if os.path.exists("/data/data/com.termux/files/usr/share/figlet/") else "/usr/share/figlet/"
     available_fonts = []
     
@@ -23,15 +24,26 @@ def get_available_fonts():
         for file in os.listdir(font_dir):
             if file.endswith(('.flf', '.tlf')):
                 font_name = file.replace('.flf', '').replace('.tlf', '')
-                if os.system(f"toilet -f {font_name} 'test' > /dev/null 2>&1") == 0:
-                    available_fonts.append(font_name)
+                # Use subprocess with timeout to test font
+                try:
+                    result = subprocess.run(
+                        ['toilet', '-f', font_name, 'test'],
+                        capture_output=True, text=True, timeout=5
+                    )
+                    if result.returncode == 0:
+                        available_fonts.append(font_name)
+                    else:
+                        print(f"\033[1;33mWarning: Font {font_name} failed to load\033[0m")
+                except subprocess.TimeoutExpired:
+                    print(f"\033[1;33mWarning: Font {font_name} timed out during test\033[0m")
+                except subprocess.SubprocessError:
+                    print(f"\033[1;33mWarning: Error testing font {font_name}\033[0m")
     except FileNotFoundError:
-        pass
+        print(f"\033[1;31mError: Font directory {font_dir} not found\033[0m")
     
     if not available_fonts:
         print("\033[1;31mError: No valid toilet fonts found in {}\033[0m".format(font_dir))
-        print("\033[1;33mPlease ensure the 'toilet' package is installed correctly.\033[0m")
-        print("\033[1;33mRun: pkg install toilet\033[0m")
+        print("\033[1;33mPlease reinstall the 'toilet' package: pkg install toilet\033[0m")
         return []
     
     return available_fonts
@@ -72,10 +84,11 @@ def TermColor(name, filt):
     try:
         if os.path.exists(motd_path) and not os.path.exists(motd_backup):
             os.system(f"mv {motd_path} {motd_backup}")
+            print("\033[1;32mBacked up MOTD to {}\033[0m".format(motd_backup))
         else:
-            print("Clear screen already set or MOTD backup exists")
+            print("\033[1;36mMOT clear screen already set or backup exists\033[0m")
     except Exception as e:
-        print(f"Could not handle MOTD: {e}")
+        print(f"\033[1;33mCould not handle MOTD: {e}\033[0m")
     
     filename = str(Path.home()) + "/.bashrc"
     backup_file = filename + ".backup"
@@ -89,12 +102,21 @@ def TermColor(name, filt):
             selected_font = random.choice(available_fonts)
             print(f"\033[1;32mUsing font: {selected_font}\033[0m")
             
-            test_cmd = f"toilet -f {selected_font} --{filt} {name} -t"
-            test_result = os.system(f"{test_cmd} > /dev/null 2>&1")
-            
-            if test_result != 0:
-                print(f"\033[1;33mWarning: Font {selected_font} with filter {filt} failed.\033[0m")
-                print("\033[1;33mPlease check toilet installation and fonts.\033[0m")
+            # Test the command before writing to .bashrc
+            try:
+                test_result = subprocess.run(
+                    ['toilet', '-f', selected_font, f'--{filt}', name, '-t'],
+                    capture_output=True, text=True, timeout=5
+                )
+                if test_result.returncode != 0:
+                    print(f"\033[1;33mWarning: Font {selected_font} with filter {filt} failed.\033[0m")
+                    print("\033[1;33mPlease check toilet installation and fonts.\033[0m")
+                    sys.exit(1)
+            except subprocess.TimeoutExpired:
+                print(f"\033[1;33mWarning: Font {selected_font} timed out during test.\033[0m")
+                sys.exit(1)
+            except subprocess.SubprocessError as e:
+                print(f"\033[1;33mWarning: Error testing font {selected_font}: {e}\033[0m")
                 sys.exit(1)
             
             username = os.getenv("USER", "user")
@@ -102,30 +124,19 @@ def TermColor(name, filt):
 PS1='\\[\\033[01;34m\\]┌──\\[\\033[01;32m\\]{username}\\[\\033[01;34m\\]@\\[\\033[01;31m\\]\\h\\[\\033[00;34m\\]\\[\\033[01;34m\\]\\w\\[\\033[00;34m\\]\\[\\033[01;32m\\]:
 \\[\\033[01;34m\\]└╼\\[\\033[01;31m\\]#\\[\\033[01;32m\\]'
 """)
-        print("\n\n")
+        print("\n")
         print("\033[1;32mPlease sip your coffee as winter works his magic -*-*-\033[0m")
         print("\033[1;32m[-] Parrotify was successful! Run 'source ~/.bashrc' or restart your terminal to apply changes.\033[0m")
         
     except IOError as e:
-        print(f"Error writing to .bashrc: {e}")
+        print(f"\033[1;31mError writing to .bashrc: {e}\033[0m")
         sys.exit(1)
 
-def countdown(seconds):
-    """Display a countdown with the ability to interrupt"""
-    try:
-        for i in range(seconds, 0, -1):
-            print(f"\rClosing in {i} seconds... Press Ctrl+C to abort", end="", flush=True)
-            time.sleep(1)
-        print("\r" + " " * 50 + "\r", end="")
-    except KeyboardInterrupt:
-        print("\nAborted by user")
-        raise
-
 def choose_filter():
-    print("\n\n")
+    print("\n")
     print("\033[1;34m  1) gay: add a rainbow colour effect\033[0m")
     print("\033[1;34m  2) metal: add a metallic colour effect\033[0m")
-    print("\n\n")
+    print("\n")
     
     form = input("Enter filter number (default: 1): ").strip()
     return form
@@ -141,26 +152,28 @@ def reversify():
     try:
         if os.path.exists(motd_backup):
             os.system(f"mv {motd_backup} {motd_path}")
-            print("\033[1;32mRestored MOTD from backup\033[0m")
+            print("\033[1;32mRestored MOTD from {}\033[0m".format(motd_backup))
         elif os.path.exists(motd_path):
             print("\033[1;32mMOTD already in place\033[0m")
+        else:
+            print("\033[1;36mNo MOTD backup found\033[0m")
     except Exception as e:
-        print(f"Could not restore MOTD: {e}")
+        print(f"\033[1;33mCould not restore MOTD: {e}\033[0m")
     
     # Restore .bashrc from backup or remove custom .bashrc
     try:
         if os.path.exists(backup_file):
             os.system(f"mv {backup_file} {filename}")
-            print("\033[1;32mRestored .bashrc from {backup_file}\033[0m")
+            print("\033[1;32mRestored .bashrc from {}\033[0m".format(backup_file))
         elif os.path.exists(filename):
             os.remove(filename)
             print("\033[1;32mRemoved custom .bashrc\033[0m")
         else:
             print("\033[1;32mNo custom .bashrc found\033[0m")
     except OSError as e:
-        print(f"Error handling .bashrc: {e}")
+        print(f"\033[1;33mError handling .bashrc: {e}\033[0m")
     
-    print("\n\n")
+    print("\n")
     print("\033[1;32mPlease sip your coffee as winter works his magic -*-*-\033[0m")
     print("\033[1;32m[-] Revert was successful! Run 'source ~/.bashrc' or restart your terminal.\033[0m")
 
@@ -173,10 +186,19 @@ def display_banner():
     
     if os.system("which toilet > /dev/null 2>&1") == 0 and available_fonts:
         selected_font = random.choice(available_fonts)
-        banner_result = os.system(f"toilet -t -f {selected_font} --gay PAR0tifyTerm 2>/dev/null")
-        
-        if banner_result != 0:
-            print("\033[1;33mFallback banner (toilet command failed):\033[0m")
+        try:
+            result = subprocess.run(
+                ['toilet', '-t', '-f', selected_font, '--gay', 'PAR0tifyTerm'],
+                capture_output=True, text=True, timeout=5
+            )
+            if result.returncode != 0:
+                print("\033[1;33mFallback banner (toilet command failed):\033[0m")
+                print_ascii_banner()
+        except subprocess.TimeoutExpired:
+            print("\033[1;33mFallback banner (toilet command timed out):\033[0m")
+            print_ascii_banner()
+        except subprocess.SubprocessError:
+            print("\033[1;33mFallback banner (toilet command error):\033[0m")
             print_ascii_banner()
     else:
         print("\033[1;33mFallback banner (toilet not found or no fonts):\033[0m")
@@ -201,9 +223,20 @@ def validate_dependencies():
     """Check if required commands are available"""
     missing_deps = []
     
-    if os.system("which toilet > /dev/null 2>&1") != 0:
+    try:
+        result = subprocess.run(['which', 'toilet'], capture_output=True, text=True, timeout=5)
+        if result.returncode != 0:
+            missing_deps.append("toilet")
+    except subprocess.TimeoutExpired:
+        print("\033[1;31mError: 'which toilet' timed out\033[0m")
         missing_deps.append("toilet")
-    if os.system("which lolcat > /dev/null 2>&1") != 0:
+    
+    try:
+        result = subprocess.run(['which', 'lolcat'], capture_output=True, text=True, timeout=5)
+        if result.returncode != 0:
+            missing_deps.append("lolcat")
+    except subprocess.TimeoutExpired:
+        print("\033[1;31mError: 'which lolcat' timed out\033[0m")
         missing_deps.append("lolcat")
     
     if missing_deps:
@@ -221,9 +254,15 @@ def validate_dependencies():
         if available_fonts:
             print("\033[1;36mTesting font availability:\033[0m")
             for font in available_fonts[:5]:
-                test_result = os.system(f"echo 'TEST' | toilet -f {font} > /dev/null 2>&1")
-                status = "✓" if test_result == 0 else "✗"
-                print(f"  {status} {font}")
+                try:
+                    test_result = subprocess.run(
+                        ['toilet', '-f', font, 'TEST'],
+                        capture_output=True, text=True, timeout=5
+                    )
+                    status = "✓" if test_result.returncode == 0 else "✗"
+                    print(f"  {status} {font}")
+                except subprocess.TimeoutExpired:
+                    print(f"  ✗ {font} (timed out)")
     
     return available_fonts
 
@@ -238,14 +277,13 @@ def main():
     
     if rev and parrot:
         print("\033[1;32m              !!! CHOOSE ONE OPTION !!!\033[0m")
-        print("\n\n")
+        print("\n")
         parser.print_help()
         
     elif parrot:
         name = input("Enter name to be displayed in termux: ").strip()
         
         if len(name) > 0:
-            # Validate name to prevent shell injection
             if not re.match(r'^[a-zA-Z0-9\s\-_]+$', name):
                 print("\033[1;31mError: Name should contain only alphanumeric characters, spaces, hyphens, and underscores\033[0m")
                 sys.exit(1)
