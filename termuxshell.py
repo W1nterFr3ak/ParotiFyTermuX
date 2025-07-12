@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 import random
 import subprocess
+import json
 
 def get_parser():
     parser = argparse.ArgumentParser(description='Parrotify Terminal - Make your terminal look like Parrot OS')
@@ -16,10 +17,38 @@ def get_parser():
     return parser
 
 def get_available_fonts():
-    """Get list of available toilet fonts with minimal testing to prevent hanging"""
+    """Get list of available toilet fonts, using cache if available"""
+    font_cache = str(Path.home()) + "/.parrotifyfonts"
     font_dir = "/data/data/com.termux/files/usr/share/figlet/"
-    available_fonts = []
     
+    # Check for cached fonts
+    if os.path.exists(font_cache):
+        try:
+            with open(font_cache, 'r') as f:
+                available_fonts = json.load(f)
+            print("\033[1;36mLoaded fonts from cache: {}\033[0m".format(", ".join(available_fonts)))
+            # Verify cached fonts are still valid
+            valid_fonts = []
+            for font in available_fonts:
+                try:
+                    result = subprocess.run(
+                        ['toilet', '-f', font, 'test'],
+                        capture_output=True, text=True, timeout=0.5
+                    )
+                    if result.returncode == 0:
+                        valid_fonts.append(font)
+                    else:
+                        print(f"\033[1;33mCached font {font} no longer valid\033[0m")
+                except (subprocess.TimeoutExpired, subprocess.SubprocessError):
+                    print(f"\033[1;33mCached font {font} failed validation\033[0m")
+            if valid_fonts:
+                return valid_fonts
+            print("\033[1;33mNo valid cached fonts; re-testing fonts\033[0m")
+        except (json.JSONDecodeError, IOError):
+            print("\033[1;33mInvalid font cache; re-testing fonts\033[0m")
+    
+    # Test fonts if no valid cache
+    available_fonts = []
     if not os.path.exists(font_dir):
         print(f"\033[1;31mError: Font directory {font_dir} not found\033[0m")
         print("\033[1;33mPlease reinstall the 'toilet' package: pkg install toilet\033[0m")
@@ -28,7 +57,7 @@ def get_available_fonts():
     print("\033[1;36mScanning fonts in {}\033[0m".format(font_dir))
     try:
         for file in os.listdir(font_dir):
-            if file.endswith(('.flf', '.tlf')) and 'ascii2' not in file.lower():  # Skip problematic fonts
+            if file.endswith(('.flf', '.tlf')) and 'ascii2' not in file.lower():
                 font_name = file.replace('.flf', '').replace('.tlf', '')
                 print(f"\033[1;36mTesting font: {font_name}\033[0m")
                 try:
@@ -52,6 +81,14 @@ def get_available_fonts():
         print("\033[1;31mError: No valid toilet fonts found\033[0m")
         print("\033[1;33mPlease reinstall the 'toilet' package: pkg install toilet\033[0m")
         return []
+    
+    # Cache valid fonts
+    try:
+        with open(font_cache, 'w') as f:
+            json.dump(available_fonts, f)
+        print(f"\033[1;32mCached fonts to {font_cache}\033[0m")
+    except IOError as e:
+        print(f"\033[1;33mWarning: Could not cache fonts to {font_cache}: {e}\033[0m")
     
     return available_fonts
 
@@ -118,6 +155,8 @@ def TermColor(name, filt):
                 if test_result.returncode != 0:
                     print(f"\033[1;33mWarning: Font {selected_font} with filter {filt} failed: {test_result.stderr}\033[0m")
                     sys.exit(1)
+                else:
+                    print(f"\033[1;32mFont {selected_font} test passed\033[0m")
             except subprocess.TimeoutExpired:
                 print(f"\033[1;33mWarning: Font {selected_font} timed out\033[0m")
                 sys.exit(1)
@@ -151,6 +190,7 @@ def reversify():
     """Revert terminal to normal state and clean up backups"""
     filename = str(Path.home()) + "/.bashrc"
     backup_file = filename + ".backup"
+    font_cache = str(Path.home()) + "/.parrotifyfonts"
     motd_path = "/data/data/com.termux/files/usr/etc/motd"
     motd_backup = "/data/data/com.termux/files/usr/etc/motdback"
     
@@ -176,6 +216,15 @@ def reversify():
             print("\033[1;32mNo custom .bashrc found\033[0m")
     except OSError as e:
         print(f"\033[1;33mError handling .bashrc: {e}\033[0m")
+    
+    try:
+        if os.path.exists(font_cache):
+            os.remove(font_cache)
+            print("\033[1;32mRemoved font cache {}\033[0m".format(font_cache))
+        else:
+            print("\033[1;36mNo font cache found\033[0m")
+    except OSError as e:
+        print(f"\033[1;33mError removing font cache: {e}\033[0m")
     
     print("\n")
     print("\033[1;32mPlease sip your coffee as winter works his magic -*-*-\033[0m")
@@ -233,15 +282,12 @@ def validate_dependencies():
     toilet_path = "/data/data/com.termux/files/usr/bin/toilet"
     lolcat_path = "/data/data/com.termux/files/usr/bin/lolcat"
     
-    # Check for native toilet
     if not os.path.exists(toilet_path):
         missing_deps.append("toilet")
     else:
         print("\033[1;32mFound toilet at {}\033[0m".format(toilet_path))
     
-    # Check for native lolcat
     if not os.path.exists(lolcat_path):
-        # Check if gem-installed lolcat exists
         try:
             gem_lolcat = subprocess.run(
                 ['gem', 'list', 'lolcat', '--installed'],
