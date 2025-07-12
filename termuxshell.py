@@ -28,7 +28,7 @@ def is_parrotified():
         with open(filename, 'r') as f:
             content = f.read()
         # Check for Parrotify-specific toilet command and PS1 prompt
-        if 'parrotified_true" in content:
+        if "parrotified_true" in content:
             return True
     except IOError:
         print("\033[1;33mWarning: Could not read .bashrc to check parrotification\033[0m")
