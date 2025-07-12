@@ -244,7 +244,7 @@ PS1='\\[\\033[01;34m\\]┌──\\[\\033[01;32m\\]{username}\\[\\033[01;34m\\]@\
 """)
         print("\n")
         print("\033[1;32mPlease sip your coffee as winter works his magic -*-*-\033[0m")
-        print("\033[1;32m[-] Parrotify was successful! Run 'source ~/.bashrc' or restart your terminal to apply changes.\033[0m")
+        print("\033[1;32m[-] Parrotify was successful! restart your terminal to apply changes.\033[0m")
         
     except IOError as e:
         print(f"\033[1;31mError writing to .bashrc: {e}\033[0m")
@@ -281,27 +281,28 @@ def reversify():
     try:
         if os.path.exists(backup_file):
             os.system(f"mv {backup_file} {filename}")
-            print("\033[1;32mRestored .bashrc from {}\033[0m".format(backup_file))
+            #print("\033[1;32mRestored .bashrc from {}\033[0m".format(backup_file))
         elif os.path.exists(filename):
             os.remove(filename)
-            print("\033[1;32mRemoved custom .bashrc\033[0m")
+            #print("\033[1;32mRemoved custom .bashrc\033[0m")
         else:
-            print("\033[1;32mNo custom .bashrc found\033[0m")
+            #print("\033[1;32mNo custom .bashrc found\033[0m")
+        print("\033[1;32mParrotify Removed Terminal Restored\033[0m")
     except OSError as e:
         print(f"\033[1;33mError handling .bashrc: {e}\033[0m")
     
     try:
         if os.path.exists(font_cache):
             os.remove(font_cache)
-            print("\033[1;32mRemoved font cache {}\033[0m".format(font_cache))
+            # print("\033[1;32mRemoved font cache {}\033[0m".format(font_cache))
         else:
-            print("\033[1;36mNo font cache found\033[0m")
+            # print("\033[1;36mNo font cache found\033[0m")
     except OSError as e:
         print(f"\033[1;33mError removing font cache: {e}\033[0m")
     
     print("\n")
     print("\033[1;32mPlease sip your coffee as winter works his magic -*-*-\033[0m")
-    print("\033[1;32m[-] Revert was successful! Run 'source ~/.bashrc' or restart your terminal.\033[0m")
+    print("\033[1;32m[-] Revert was successful!restart your terminal.\033[0m")
 
 def display_banner():
     """Display the main banner"""
@@ -335,9 +336,9 @@ def display_banner():
         print_ascii_banner()
     
     print("\033[1;32m")
-    print("\033[1;34m          Created By W1nterFr3ak\033[0m")
-    print("\033[2;32m     Winter says Parrot is awesome\033[0m")
-    print("\033[1;32m   Mail: WinterFreak@protonmail.com\033[0m")
+    print("\033[1;34m          Created By Winter and Fixed by Tricetech\033[0m")
+    print("\033[2;32m     Winter says Parrot is awesome ..  enjoy\033[0m")
+    print("\033[1;32m   Mail: winterfreak@protonmail.com\033[0m")
     print()
 
 def print_ascii_banner():
@@ -359,7 +360,7 @@ def validate_dependencies():
     if not os.path.exists(toilet_path):
         missing_deps.append("toilet")
     else:
-        print("\033[1;32mFound toilet at {}\033[0m".format(toilet_path))
+        # print("\033[1;32mFound toilet at {}\033[0m".format(toilet_path))
     
     if not os.path.exists(lolcat_path):
         try:
@@ -374,12 +375,12 @@ def validate_dependencies():
         except subprocess.SubprocessError:
             missing_deps.append("lolcat")
     else:
-        print("\033[1;32mFound lolcat at {}\033[0m".format(lolcat_path))
+        # print("\033[1;32mFound lolcat at {}\033[0m".format(lolcat_path))
     
     if not os.path.exists(jq_path):
         missing_deps.append("jq")
     else:
-        print("\033[1;32mFound jq at {}\033[0m".format(jq_path))
+        # print("\033[1;32mFound jq at {}\033[0m".format(jq_path))
     
     if missing_deps:
         print("\033[1;33mWarning: Missing dependencies: {}\033[0m".format(", ".join(missing_deps)))
@@ -391,10 +392,10 @@ def validate_dependencies():
     else:
         available_fonts = check_toilet_fonts_package()
         print(f"\033[1;36mDetected {len(available_fonts)} available toilet fonts\033[0m")
-        if available_fonts:
-            print("\033[1;36mAvailable fonts:\033[0m")
-            for font in available_fonts[:5]:
-                print(f"  ✓ {font}")
+        #if available_fonts:
+        #    print("\033[1;36mAvailable fonts:\033[0m")
+        #    for font in available_fonts[:5]:
+        #        print(f"  ✓ {font}")
     
     return available_fonts
 
