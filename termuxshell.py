@@ -17,25 +17,31 @@ def get_parser():
 
 def get_available_fonts():
     """Get list of available toilet fonts by checking the figlet font directory"""
-    print("\033[1;36m[DEBUG] Checking available fonts...\033[0m")
+    print("\033[1;36m[DEBUG] Entering get_available_fonts...\033[0m")
     font_dir = "/data/data/com.termux/files/usr/share/figlet/" if os.path.exists("/data/data/com.termux/files/usr/share/figlet/") else "/usr/share/figlet/"
     available_fonts = []
     
+    print(f"\033[1;36m[DEBUG] Checking font directory: {font_dir}\033[0m")
     try:
+        if not os.path.exists(font_dir):
+            print("\033[1;33m[DEBUG] Font directory does not exist\033[0m")
+            return ["standard"]
+        
         for file in os.listdir(font_dir):
             if file.endswith(('.flf', '.tlf')):
                 font_name = file.replace('.flf', '').replace('.tlf', '')
-                # Test if font is usable
-                if os.system(f"toilet -f {font_name} test > /dev/null 2>&1") == 0:
-                    available_fonts.append(font_name)
-    except FileNotFoundError:
-        print("\033[1;33m[DEBUG] Font directory not found, using fallback\033[0m")
+                print(f"\033[1;36m[DEBUG] Found font: {font_name}\033[0m")
+                # Skip font testing to avoid hangs; assume font is usable
+                available_fonts.append(font_name)
+    except Exception as e:
+        print(f"\033[1;31m[DEBUG] Error accessing font directory: {e}\033[0m")
     
     # Fallback to standard font if none found
     if not available_fonts:
+        print("\033[1;33m[DEBUG] No fonts found, using fallback: standard\033[0m")
         available_fonts = ["standard"]
     
-    print(f"\033[1;36m[DEBUG] Found fonts: {available_fonts}\033[0m")
+    print(f"\033[1;36m[DEBUG] Available fonts: {available_fonts}\033[0m")
     return available_fonts
 
 def install_fonts():
@@ -57,6 +63,7 @@ def install_fonts():
     # Create temporary directory
     try:
         os.makedirs(temp_dir, exist_ok=True)
+        print("\033[1;36m[DEBUG] Created temp directory\033[0m")
     except Exception as e:
         print(f"\033[1;31m[DEBUG] Failed to create temp directory: {e}\033[0m")
         return get_available_fonts()
@@ -64,9 +71,13 @@ def install_fonts():
     # Download fonts from xero/figlet-fonts
     repo_url = "https://github.com/xero/figlet-fonts.git"
     print("\033[1;32m[DEBUG] Downloading fonts from xero/figlet-fonts...\033[0m")
-    result = os.system(f"git clone {repo_url} {temp_dir} > /dev/null 2>&1")
-    if result != 0:
-        print("\033[1;31m[DEBUG] Failed to download fonts. Continuing with default fonts.\033[0m")
+    try:
+        subprocess.run(f"git clone {repo_url} {temp_dir}", shell=True, timeout=30, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except subprocess.TimeoutExpired:
+        print("\033[1;31m[DEBUG] Font download timed out. Continuing with default fonts.\033[0m")
+        return get_available_fonts()
+    except subprocess.CalledProcessError as e:
+        print(f"\033[1;31m[DEBUG] Failed to download fonts: {e}. Continuing with default fonts.\033[0m")
         return get_available_fonts()
 
     # Move .flf and .tlf files to font directory
@@ -81,6 +92,7 @@ def install_fonts():
     finally:
         # Clean up temporary directory
         os.system(f"rm -rf {temp_dir}")
+        print("\033[1;36m[DEBUG] Cleaned up temp directory\033[0m")
 
     print("\033[1;36m[DEBUG] Re-scanning available fonts...\033[0m")
     time.sleep(2)
@@ -88,12 +100,13 @@ def install_fonts():
 
 def check_toilet_fonts_package():
     """Check available fonts and install additional fonts if needed in Termux"""
-    print("\033[1;36m[DEBUG] Checking toilet fonts package...\033[0m")
+    print("\033[1;36m[DEBUG] Entering check_toilet_fonts_package...\033[0m")
     available_fonts = get_available_fonts()
     extended_fonts = ["slant", "3d", "doom", "starwars", "gothic"]
     has_extended = any(font in available_fonts for font in extended_fonts)
     
     if not has_extended and len(available_fonts) <= 10 and os.path.exists("/data/data/com.termux/files/usr/"):
+        print("\033[1;36m[DEBUG] No extended fonts found, installing...\033[0m")
         available_fonts = install_fonts()
     
     print("\033[1;33m" + "="*60 + "\033[0m")
@@ -103,7 +116,7 @@ def check_toilet_fonts_package():
     return available_fonts
 
 def TermColor(name, filt):
-    print("\033[1;36m[DEBUG] Running TermColor...\033[0m")
+    print("\033[1;36m[DEBUG] Entering TermColor...\033[0m")
     available_fonts = get_available_fonts()
     
     print(f"\033[1;36mAvailable fonts: {', '.join(available_fonts)}\033[0m")
@@ -137,12 +150,15 @@ def TermColor(name, filt):
             selected_font = random.choice(available_fonts)
             print(f"\033[1;32m[DEBUG] Using font: {selected_font}\033[0m")
             
-            # Test the command before writing
+            # Test the command with timeout
             test_cmd = f"toilet -f {selected_font} --{filt} {name} -t"
-            test_result = os.system(f"{test_cmd} > /dev/null 2>&1")
-            
-            if test_result != 0:
-                print(f"\033[1;33m[DEBUG] Font {selected_font} with filter {filt} failed, using standard font\033[0m")
+            try:
+                subprocess.run(test_cmd, shell=True, timeout=5, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            except subprocess.TimeoutExpired:
+                print(f"\033[1;33m[DEBUG] Font {selected_font} test timed out, using standard font\033[0m")
+                selected_font = "standard"
+            except subprocess.CalledProcessError:
+                print(f"\033[1;33m[DEBUG] Font {selected_font} test failed, using standard font\033[0m")
                 selected_font = "standard"
             
             # Use current username for PS1
@@ -180,7 +196,7 @@ def choose_filter():
 
 def reversify():
     """Revert terminal to normal state and clean up"""
-    print("\033[1;36m[DEBUG] Running reversify...\033[0m")
+    print("\033[1;36m[DEBUG] Entering reversify...\033[0m")
     filename = str(Path.home()) + "/.bashrc"
     backup_file = filename + ".backup"
     motd_path = "/data/data/com.termux/files/usr/etc/motd"
@@ -225,7 +241,7 @@ def reversify():
 
 def display_banner():
     """Display the main banner"""
-    print("\033[1;36m[DEBUG] Displaying banner...\033[0m")
+    print("\033[1;36m[DEBUG] Entering display_banner...\033[0m")
     available_fonts = get_available_fonts()
     
     os.system("clear")
@@ -233,13 +249,18 @@ def display_banner():
     
     if os.system("which toilet > /dev/null 2>&1") == 0:
         selected_font = random.choice(available_fonts)
-        banner_result = os.system(f"toilet -t -f {selected_font} --gay PAR0tifyTerm 2>/dev/null")
-        
-        if banner_result != 0:
-            print("\033[1;33m[DEBUG] Fallback banner (toilet command failed)\033[0m")
+        print(f"\033[1;36m[DEBUG] Using font for banner: {selected_font}\033[0m")
+        try:
+            # Use timeout to prevent hanging
+            subprocess.run(f"toilet -t -f {selected_font} --gay PAR0tifyTerm", shell=True, timeout=5)
+        except subprocess.TimeoutExpired:
+            print("\033[1;33m[DEBUG] Toilet command timed out, using fallback banner\033[0m")
+            print_ascii_banner()
+        except subprocess.CalledProcessError:
+            print("\033[1;33m[DEBUG] Toilet command failed, using fallback banner\033[0m")
             print_ascii_banner()
     else:
-        print("\033[1;33m[DEBUG] Fallback banner (toilet not found)\033[0m")
+        print("\033[1;33m[DEBUG] Toilet not found, using fallback banner\033[0m")
         print_ascii_banner()
     
     print("\033[1;32m")
@@ -247,6 +268,7 @@ def display_banner():
     print("\033[2;32m     Winter says Parrot is awesome\033[0m")
     print("\033[1;32m   Mail: WinterFreak@protonmail.com\033[0m")
     print()
+    print("\033[1;36m[DEBUG] Banner display completed\033[0m")
 
 def print_ascii_banner():
     """Print ASCII art banner as fallback"""
@@ -260,7 +282,7 @@ def print_ascii_banner():
 
 def validate_dependencies():
     """Check if required commands are available"""
-    print("\033[1;36m[DEBUG] Validating dependencies...\033[0m")
+    print("\033[1;36m[DEBUG] Entering validate_dependencies...\033[0m")
     missing_deps = []
     
     if os.system("which toilet > /dev/null 2>&1") != 0:
@@ -308,7 +330,7 @@ def main():
             if not re.match(r'^[a-zA-Z0-9\s\-_]+$', name):
                 print("\033[1;31m[DEBUG] Error: Name should contain only alphanumeric characters, spaces, hyphens, and underscores\033[0m")
                 sys.exit(1)
-            # Escape name for февраля shell safety
+            # Escape name for shell safety
             name = name.replace('"', '\\"').replace('`', '\\`')
             print(f"\033[1;36m[DEBUG] Validated name: {name}\033[0m")
             
