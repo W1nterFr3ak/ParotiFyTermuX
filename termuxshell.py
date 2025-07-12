@@ -17,6 +17,7 @@ def get_parser():
 
 def get_available_fonts():
     """Get list of available toilet fonts by checking the figlet font directory"""
+    print("\033[1;36m[DEBUG] Checking available fonts...\033[0m")
     font_dir = "/data/data/com.termux/files/usr/share/figlet/" if os.path.exists("/data/data/com.termux/files/usr/share/figlet/") else "/usr/share/figlet/"
     available_fonts = []
     
@@ -28,12 +29,13 @@ def get_available_fonts():
                 if os.system(f"toilet -f {font_name} test > /dev/null 2>&1") == 0:
                     available_fonts.append(font_name)
     except FileNotFoundError:
-        pass
+        print("\033[1;33m[DEBUG] Font directory not found, using fallback\033[0m")
     
     # Fallback to standard font if none found
     if not available_fonts:
         available_fonts = ["standard"]
     
+    print(f"\033[1;36m[DEBUG] Found fonts: {available_fonts}\033[0m")
     return available_fonts
 
 def install_fonts():
@@ -42,29 +44,29 @@ def install_fonts():
     temp_dir = "/data/data/com.termux/files/usr/share/figlet_temp/"
 
     print("\033[1;33m" + "="*60 + "\033[0m")
-    print("\033[1;33mInstalling additional fonts for Termux...\033[0m")
+    print("\033[1;33m[DEBUG] Installing additional fonts for Termux...\033[0m")
 
     # Ensure git is installed
     if os.system("which git > /dev/null 2>&1") != 0:
-        print("\033[1;32mInstalling git...\033[0m")
+        print("\033[1;32m[DEBUG] Installing git...\033[0m")
         result = os.system("pkg install git -y")
         if result != 0:
-            print("\033[1;31mFailed to install git. Continuing with default fonts.\033[0m")
+            print("\033[1;31m[DEBUG] Failed to install git. Continuing with default fonts.\033[0m")
             return get_available_fonts()
 
     # Create temporary directory
     try:
         os.makedirs(temp_dir, exist_ok=True)
     except Exception as e:
-        print(f"\033[1;31mFailed to create temp directory: {e}\033[0m")
+        print(f"\033[1;31m[DEBUG] Failed to create temp directory: {e}\033[0m")
         return get_available_fonts()
 
     # Download fonts from xero/figlet-fonts
     repo_url = "https://github.com/xero/figlet-fonts.git"
-    print("\033[1;32mDownloading fonts from xero/figlet-fonts...\033[0m")
+    print("\033[1;32m[DEBUG] Downloading fonts from xero/figlet-fonts...\033[0m")
     result = os.system(f"git clone {repo_url} {temp_dir} > /dev/null 2>&1")
     if result != 0:
-        print("\033[1;31mFailed to download fonts. Continuing with default fonts.\033[0m")
+        print("\033[1;31m[DEBUG] Failed to download fonts. Continuing with default fonts.\033[0m")
         return get_available_fonts()
 
     # Move .flf and .tlf files to font directory
@@ -72,20 +74,21 @@ def install_fonts():
         os.makedirs(font_dir, exist_ok=True)
         os.system(f"mv {temp_dir}*.flf {font_dir} 2>/dev/null")
         os.system(f"mv {temp_dir}*.tlf {font_dir} 2>/dev/null")
-        print("\033[1;32m✓ Fonts installed successfully!\033[0m")
+        print("\033[1;32m[DEBUG] ✓ Fonts installed successfully!\033[0m")
     except Exception as e:
-        print(f"\033[1;31mFailed to install fonts: {e}\033[0m")
+        print(f"\033[1;31m[DEBUG] Failed to install fonts: {e}\033[0m")
         return get_available_fonts()
     finally:
         # Clean up temporary directory
         os.system(f"rm -rf {temp_dir}")
 
-    print("\033[1;36mRe-scanning available fonts...\033[0m")
+    print("\033[1;36m[DEBUG] Re-scanning available fonts...\033[0m")
     time.sleep(2)
     return get_available_fonts()
 
 def check_toilet_fonts_package():
     """Check available fonts and install additional fonts if needed in Termux"""
+    print("\033[1;36m[DEBUG] Checking toilet fonts package...\033[0m")
     available_fonts = get_available_fonts()
     extended_fonts = ["slant", "3d", "doom", "starwars", "gothic"]
     has_extended = any(font in available_fonts for font in extended_fonts)
@@ -100,6 +103,7 @@ def check_toilet_fonts_package():
     return available_fonts
 
 def TermColor(name, filt):
+    print("\033[1;36m[DEBUG] Running TermColor...\033[0m")
     available_fonts = get_available_fonts()
     
     print(f"\033[1;36mAvailable fonts: {', '.join(available_fonts)}\033[0m")
@@ -111,10 +115,11 @@ def TermColor(name, filt):
     try:
         if os.path.exists(motd_path) and not os.path.exists(motd_backup):
             os.system(f"mv {motd_path} {motd_backup}")
+            print("\033[1;32m[DEBUG] Backed up MOTD\033[0m")
         else:
-            print("MOTD already backed up or does not exist")
+            print("\033[1;36m[DEBUG] MOTD already backed up or does not exist\033[0m")
     except Exception as e:
-        print(f"Could not handle MOTD: {e}")
+        print(f"\033[1;31m[DEBUG] Could not handle MOTD: {e}\033[0m")
     
     # Backup .bashrc
     filename = str(Path.home()) + "/.bashrc"
@@ -122,22 +127,22 @@ def TermColor(name, filt):
     try:
         if os.path.exists(filename):
             os.system(f"cp {filename} {backup_file}")
-            print(f"\033[1;32mBacked up .bashrc to {backup_file}\033[0m")
+            print(f"\033[1;32m[DEBUG] Backed up .bashrc to {backup_file}\033[0m")
     except Exception as e:
-        print(f"\033[1;31mFailed to backup .bashrc: {e}\033[0m")
+        print(f"\033[1;31m[DEBUG] Failed to backup .bashrc: {e}\033[0m")
     
     # Update .bashrc
     try:
         with open(filename, "w") as new:
             selected_font = random.choice(available_fonts)
-            print(f"\033[1;32mUsing font: {selected_font}\033[0m")
+            print(f"\033[1;32m[DEBUG] Using font: {selected_font}\033[0m")
             
             # Test the command before writing
             test_cmd = f"toilet -f {selected_font} --{filt} {name} -t"
             test_result = os.system(f"{test_cmd} > /dev/null 2>&1")
             
             if test_result != 0:
-                print(f"\033[1;33mWarning: Font {selected_font} with filter {filt} failed, using standard font\033[0m")
+                print(f"\033[1;33m[DEBUG] Font {selected_font} with filter {filt} failed, using standard font\033[0m")
                 selected_font = "standard"
             
             # Use current username for PS1
@@ -149,18 +154,19 @@ PS1='\\[\\033[01;34m\\]┌──\\[\\033[01;32m\\]{username}\\[\\033[01;34m\\]@\
         print("\n\033[1;32mParrotify was successful!\033[0m")
         print("\033[1;32mPlease run 'source ~/.bashrc' or restart your terminal to apply changes.\033[0m")
     except IOError as e:
-        print(f"\033[1;31mError writing to .bashrc: {e}\033[0m")
+        print(f"\033[1;31m[DEBUG] Error writing to .bashrc: {e}\033[0m")
         sys.exit(1)
 
 def countdown(seconds):
     """Display a countdown with the ability to interrupt"""
+    print("\033[1;36m[DEBUG] Starting countdown...\033[0m")
     try:
         for i in range(seconds, 0, -1):
             print(f"\rClosing in {i} seconds... Press Ctrl+C to abort", end="", flush=True)
             time.sleep(1)
         print("\r" + " " * 50 + "\r", end="")
     except KeyboardInterrupt:
-        print("\nAborted by user")
+        print("\n\033[1;33m[DEBUG] Aborted by user\033[0m")
         raise
 
 def choose_filter():
@@ -169,10 +175,12 @@ def choose_filter():
     print()
     
     form = input("Enter filter number (default: 1): ").strip()
+    print(f"\033[1;36m[DEBUG] Selected filter: {form}\033[0m")
     return form
 
 def reversify():
     """Revert terminal to normal state and clean up"""
+    print("\033[1;36m[DEBUG] Running reversify...\033[0m")
     filename = str(Path.home()) + "/.bashrc"
     backup_file = filename + ".backup"
     motd_path = "/data/data/com.termux/files/usr/etc/motd"
@@ -183,24 +191,24 @@ def reversify():
     try:
         if os.path.exists(motd_backup):
             os.system(f"mv {motd_backup} {motd_path}")
-            print("\033[1;32mRestored MOTD\033[0m")
+            print("\033[1;32m[DEBUG] Restored MOTD\033[0m")
     except Exception as e:
-        print(f"\033[1;31mCould not restore MOTD: {e}\033[0m")
+        print(f"\033[1;31m[DEBUG] Could not restore MOTD: {e}\033[0m")
     
     # Restore .bashrc from backup
     try:
         if os.path.exists(backup_file):
             os.system(f"mv {backup_file} {filename}")
-            print("\033[1;32mRestored .bashrc from backup\033[0m")
+            print("\033[1;32m[DEBUG] Restored .bashrc from backup\033[0m")
         elif os.path.exists(filename):
             os.remove(filename)
-            print("\033[1;32mRemoved custom .bashrc\033[0m")
+            print("\033[1;32m[DEBUG] Removed custom .bashrc\033[0m")
         else:
-            print("\033[1;32mNo custom .bashrc found\033[0m")
+            print("\033[1;32m[DEBUG] No custom .bashrc found\033[0m")
     except OSError as e:
-        print(f"\033[1;31mError during revert: {e}\033[0m")
+        print(f"\033[1;31m[DEBUG] Error during revert: {e}\033[0m")
     
-    # Clean up downloaded fonts (optional, only if no other tools use them)
+    # Clean up downloaded fonts (excluding default ones)
     try:
         extended_fonts = ["slant", "3d", "doom", "starwars", "gothic"]
         default_fonts = ["standard", "big", "small", "mini", "block", "bubble", "digital", "script", "shadow", "banner"]
@@ -208,15 +216,16 @@ def reversify():
             font_name = font.replace('.flf', '').replace('.tlf', '')
             if font_name not in default_fonts and font.endswith(('.flf', '.tlf')):
                 os.remove(os.path.join(font_dir, font))
-                print(f"\033[1;32mRemoved downloaded font: {font}\033[0m")
+                print(f"\033[1;32m[DEBUG] Removed downloaded font: {font}\033[0m")
     except Exception as e:
-        print(f"\033[1;31mCould not clean up fonts: {e}\033[0m")
+        print(f"\033[1;31m[DEBUG] Could not clean up fonts: {e}\033[0m")
     
     print("\n\033[1;32mReversing Parrotify was successful!\033[0m")
     print("\033[1;32mPlease run 'source ~/.bashrc' or restart your terminal to apply changes.\033[0m")
 
 def display_banner():
     """Display the main banner"""
+    print("\033[1;36m[DEBUG] Displaying banner...\033[0m")
     available_fonts = get_available_fonts()
     
     os.system("clear")
@@ -227,10 +236,10 @@ def display_banner():
         banner_result = os.system(f"toilet -t -f {selected_font} --gay PAR0tifyTerm 2>/dev/null")
         
         if banner_result != 0:
-            print("\033[1;33mFallback banner (toilet command failed):\033[0m")
+            print("\033[1;33m[DEBUG] Fallback banner (toilet command failed)\033[0m")
             print_ascii_banner()
     else:
-        print("\033[1;33mFallback banner (toilet not found):\033[0m")
+        print("\033[1;33m[DEBUG] Fallback banner (toilet not found)\033[0m")
         print_ascii_banner()
     
     print("\033[1;32m")
@@ -241,6 +250,7 @@ def display_banner():
 
 def print_ascii_banner():
     """Print ASCII art banner as fallback"""
+    print("\033[1;36m[DEBUG] Printing ASCII banner...\033[0m")
     print("██████╗  █████╗ ██████╗  ██████╗ ████████╗██╗███████╗██╗   ██╗")
     print("██╔══██╗██╔══██╗██╔══██╗██╔═══██╗╚══██╔══╝██║██╔════╝╚██╗ ██╔╝")
     print("██████╔╝███████║██████╔╝██║   ██║   ██║   ██║█████╗   ╚████╔╝ ")
@@ -250,6 +260,7 @@ def print_ascii_banner():
 
 def validate_dependencies():
     """Check if required commands are available"""
+    print("\033[1;36m[DEBUG] Validating dependencies...\033[0m")
     missing_deps = []
     
     if os.system("which toilet > /dev/null 2>&1") != 0:
@@ -258,22 +269,21 @@ def validate_dependencies():
         missing_deps.append("lolcat")
     
     if missing_deps:
-        print("\033[1;33mWarning: The following dependencies are missing:\033[0m")
-        for dep in missing_deps:
-            print(f"  - {dep}")
+        print("\033[1;33m[DEBUG] Missing dependencies: {', '.join(missing_deps)}\033[0m")
         print("\033[1;33mInstall them with: pkg install toilet lolcat\033[0m")
         response = input("Install now? (y/N): ").strip().lower()
         if response in ['y', 'yes']:
             os.system("pkg install toilet lolcat -y")
         else:
-            print("Exiting...")
+            print("\033[1;33m[DEBUG] Exiting due to missing dependencies\033[0m")
             sys.exit(1)
     
     available_fonts = check_toilet_fonts_package()
-    print(f"\033[1;36mDetected {len(available_fonts)} available toilet fonts\033[0m")
+    print(f"\033[1;36m[DEBUG] Detected {len(available_fonts)} available toilet fonts\033[0m")
     return available_fonts
 
 def main():
+    print("\033[1;36m[DEBUG] Starting main function...\033[0m")
     display_banner()
     available_fonts = validate_dependencies()
     
@@ -286,17 +296,21 @@ def main():
         print("\033[1;32m              !!! CHOOSE ONE OPTION !!!\033[0m")
         print("\n\n")
         parser.print_help()
+        print("\033[1;36m[DEBUG] Exiting due to conflicting options\033[0m")
+        sys.exit(1)
         
     elif parrot:
+        print("\033[1;36m[DEBUG] Running parrotify mode...\033[0m")
         name = input("Enter name to be displayed in termux: ").strip()
         
         if len(name) > 0:
             # Validate name to prevent shell injection
             if not re.match(r'^[a-zA-Z0-9\s\-_]+$', name):
-                print("\033[1;31mError: Name should contain only alphanumeric characters, spaces, hyphens, and underscores\033[0m")
+                print("\033[1;31m[DEBUG] Error: Name should contain only alphanumeric characters, spaces, hyphens, and underscores\033[0m")
                 sys.exit(1)
-            # Escape name for shell safety
+            # Escape name for февраля shell safety
             name = name.replace('"', '\\"').replace('`', '\\`')
+            print(f"\033[1;36m[DEBUG] Validated name: {name}\033[0m")
             
             form = choose_filter()
             
@@ -307,26 +321,33 @@ def main():
                 form = 'metal'
                 TermColor(name, form)
             elif form.lower() == "q":
-                sys.exit()
+                print("\033[1;36m[DEBUG] User quit during filter selection\033[0m")
+                sys.exit(0)
             else:
-                print("Using default option (rainbow)")
+                print("\033[1;36m[DEBUG] Using default filter (gay)\033[0m")
                 form = "gay"
                 TermColor(name, form)
         else:
-            print("\033[1;32m!!! Please rerun the script and input the name to be displayed !!!\033[0m")
+            print("\033[1;32m[DEBUG] !!! Please rerun the script and input the name to be displayed !!!\033[0m")
             sys.exit(1)
             
     elif rev:
+        print("\033[1;36m[DEBUG] Running revert mode...\033[0m")
         reversify()
     else:
+        print("\033[1;36m[DEBUG] No options provided, displaying help...\033[0m")
         parser.print_help()
+        print("\033[1;36m[DEBUG] Exiting after help display\033[0m")
+        sys.exit(0)
 
 if __name__ == "__main__":
     try:
+        print("\033[1;36m[DEBUG] Script started\033[0m")
         main()
+        print("\033[1;36m[DEBUG] Script completed\033[0m")
     except KeyboardInterrupt:
-        print("\n\033[1;33mScript interrupted by user\033[0m")
+        print("\n\033[1;33m[DEBUG] Script interrupted by user\033[0m")
         sys.exit(0)
     except Exception as e:
-        print(f"\033[1;31mUnexpected error: {e}\033[0m")
+        print(f"\033[1;31m[DEBUG] Unexpected error: {e}\033[0m")
         sys.exit(1)
