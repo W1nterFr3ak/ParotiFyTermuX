@@ -56,13 +56,13 @@ def check_toilet_fonts_package():
     has_extended = any(font in available_fonts for font in extended_fonts)
     
     if not has_extended and len(available_fonts) <= 10:
-        print("\\033[1;33m" + "="*60 + "\\033[0m")
-        print("\\033[1;33mLooks like you're missing the `toilet-fonts` package!\\033[0m")
-        print("\\033[1;36mThis package includes popular fonts like:\\033[0m")
-        print("\\033[1;32m  - slant, 3d, doom, starwars, gothic\\033[0m")
+        print("\033[1;33m" + "="*60 + "\033[0m")
+        print("\033[1;33mLooks like you're missing the `toilet-fonts` package!\033[0m")
+        print("\033[1;36mThis package includes popular fonts like:\033[0m")
+        print("\033[1;32m  - slant, 3d, doom, starwars, gothic\033[0m")
         print()
-        print("\\033[1;36mCurrent available fonts:\\033[0m", end=" ")
-        print("\\033[1;32m" + ", ".join(available_fonts) + "\\033[0m")
+        print("\033[1;36mCurrent available fonts:\033[0m", end=" ")
+        print("\033[1;32m" + ", ".join(available_fonts) + "\033[0m")
         print()
         
         # Detect package manager and suggest installation
@@ -79,32 +79,32 @@ def check_toilet_fonts_package():
         else:
             install_cmd = "# Check your package manager for toilet-fonts"
         
-        print(f"\\033[1;36mTo install more fonts, run:\\033[0m")
-        print(f"\\033[1;32m{install_cmd}\\033[0m")
+        print(f"\033[1;36mTo install more fonts, run:\033[0m")
+        print(f"\033[1;32m{install_cmd}\033[0m")
         print()
         
-        response = input("\\033[1;33mWould you like to install toilet-fonts now? (y/N): \\033[0m").strip().lower()
+        response = input("\033[1;33mWould you like to install toilet-fonts now? (y/N): \033[0m").strip().lower()
         
         if response in ['y', 'yes']:
-            print("\\033[1;32mInstalling toilet-fonts...\\033[0m")
+            print("\033[1;32mInstalling toilet-fonts...\033[0m")
             result = os.system(install_cmd)
             
             if result == 0:
-                print("\\033[1;32m✓ toilet-fonts installed successfully!\\033[0m")
-                print("\\033[1;36mRe-scanning available fonts...\\033[0m")
+                print("\033[1;32m✓ toilet-fonts installed successfully!\033[0m")
+                print("\033[1;36mRe-scanning available fonts...\033[0m")
                 time.sleep(2)
                 # Return updated font list
                 return get_available_fonts()
             else:
-                print("\\033[1;31m✗ Installation failed. You may need to run manually:\\033[0m")
-                print(f"\\033[1;31m{install_cmd}\\033[0m")
-                print("\\033[1;33mContinuing with available fonts...\\033[0m")
+                print("\033[1;31m✗ Installation failed. You may need to run manually:\033[0m")
+                print(f"\033[1;31m{install_cmd}\033[0m")
+                print("\033[1;33mContinuing with available fonts...\033[0m")
                 time.sleep(2)
         else:
-            print("\\033[1;33mSkipping installation. Continuing with available fonts...\\033[0m")
+            print("\033[1;33mSkipping installation. Continuing with available fonts...\033[0m")
             time.sleep(1)
         
-        print("\\033[1;33m" + "="*60 + "\\033[0m")
+        print("\033[1;33m" + "="*60 + "\033[0m")
         print()
     
     return available_fonts
@@ -113,7 +113,7 @@ def check_toilet_fonts_package():
 def TermColor(name, filt):
     available_fonts = get_available_fonts()
     
-    print(f"\\033[1;36mAvailable fonts: {', '.join(available_fonts)}\\033[0m")
+    print(f"\033[1;36mAvailable fonts: {', '.join(available_fonts)}\033[0m")
     
     # Handle MOTD backup for Termux
     motd_path = "/data/data/com.termux/files/usr/etc/motd"
@@ -133,32 +133,32 @@ def TermColor(name, filt):
     try:
         with open(filename, "w") as new:
             selected_font = random.choice(available_fonts)
-            print(f"\\033[1;32mUsing font: {selected_font}\\033[0m")
+            print(f"\033[1;32mUsing font: {selected_font}\033[0m")
             
             # Test the command before writing to .bashrc
             test_cmd = f"toilet -f {selected_font} --{filt} {name} -t"
             test_result = os.system(f"{test_cmd} > /dev/null 2>&1")
             
             if test_result != 0:
-                print(f"\\033[1;33mWarning: Font {selected_font} with filter {filt} failed, using standard font\\033[0m")
+                print(f"\033[1;33mWarning: Font {selected_font} with filter {filt} failed, using standard font\033[0m")
                 selected_font = "standard"
             
             new.write(f"""toilet -f {selected_font} --{filt} {name} -t | lolcat
 PS1='\\[\\033[01;34m\\]┌──\\[\\033[01;32m\\]root\\[\\033[01;34m\\]@\\[\\033[01;31m\\]\\h\\[\\033[00;34m\\]\\[\\033[01;34m\\]\\w\\[\\033[00;34m\\]\\[\\033[01;32m\\]:
 \\[\\033[01;34m\\]└╼\\[\\033[01;31m\\]#\\[\\033[01;32m\\]'
 """)
-        print("\\n\\n")
-        print("\\033[1;32mPlease sip your coffee as winter works his magic -*-*-\\033[0m")
-        print("\\033[1;32m[-] Parrotify was successful, closing terminal. Press Ctrl+C to abort\\033[0m")
+        print("\n\n")
+        print("\033[1;32mPlease sip your coffee as winter works his magic -*-*-\033[0m")
+        print("\033[1;32m[-] Parrotify was successful, closing terminal. Press Ctrl+C to abort\033[0m")
         
         countdown(10)
         
         try:
             os.kill(os.getppid(), signal.SIGHUP)
         except ProcessLookupError:
-            print("\\033[1;33mCould not close terminal automatically. Please restart your terminal manually.\\033[0m")
+            print("\033[1;33mCould not close terminal automatically. Please restart your terminal manually.\033[0m")
         except KeyboardInterrupt:
-            print("\\nQuitting_*_*_*_*_*_")
+            print("\nQuitting_*_*_*_*_*_")
             time.sleep(1)
             
     except IOError as e:
@@ -170,19 +170,19 @@ def countdown(seconds):
     """Display a countdown with the ability to interrupt"""
     try:
         for i in range(seconds, 0, -1):
-            print(f"\\rClosing in {i} seconds... Press Ctrl+C to abort", end="", flush=True)
+            print(f"\rClosing in {i} seconds... Press Ctrl+C to abort", end="", flush=True)
             time.sleep(1)
-        print("\\r" + " " * 50 + "\\r", end="")  # Clear the line
+        print("\r" + " " * 50 + "\r", end="")  # Clear the line
     except KeyboardInterrupt:
-        print("\\nAborted by user")
+        print("\nAborted by user")
         raise
 
 
 def choose_filter():
-    print("\\n\\n")
-    print("\\033[1;34m  1) gay: add a rainbow colour effect\\033[0m")
-    print("\\033[1;34m  2) metal: add a metallic colour effect\\033[0m")
-    print("\\n\\n")
+    print("\n\n")
+    print("\033[1;34m  1) gay: add a rainbow colour effect\033[0m")
+    print("\033[1;34m  2) metal: add a metallic colour effect\033[0m")
+    print("\n\n")
     
     form = input("Enter filter number (default: 1): ").strip()
     return form
@@ -205,30 +205,30 @@ def reversify():
     try:
         if os.path.exists(filename):
             os.remove(filename)
-            print("\\033[1;32m!!! Custom .bashrc removed !!!\\033[0m")
+            print("\033[1;32m!!! Custom .bashrc removed !!!\033[0m")
         else:
-            print("\\033[1;32m!!! Your termux is already normal !!!\\033[0m")
+            print("\033[1;32m!!! Your termux is already normal !!!\033[0m")
     except OSError as e:
         print(f"Error removing .bashrc: {e}")
     
-    print("\\n\\n")
-    print("\\033[1;32mPlease sip your coffee as winter works his magic -*-*-\\033[0m")
-    print("\\n\\n")
+    print("\n\n")
+    print("\033[1;32mPlease sip your coffee as winter works his magic -*-*-\033[0m")
+    print("\n\n")
     
     try:
-        print("\\033[1;32m[-] Reversing Parrotify was successful, closing terminal. Press Ctrl+C to abort\\033[0m")
+        print("\033[1;32m[-] Reversing Parrotify was successful, closing terminal. Press Ctrl+C to abort\033[0m")
         countdown(10)
         
         try:
             os.kill(os.getppid(), signal.SIGHUP)
         except ProcessLookupError:
-            print("\\033[1;33mCould not close terminal automatically. Please restart your terminal manually.\\033[0m")
+            print("\033[1;33mCould not close terminal automatically. Please restart your terminal manually.\033[0m")
         except KeyboardInterrupt:
-            print("\\nQuitting_*_*_*_*_*_")
+            print("\nQuitting_*_*_*_*_*_")
             time.sleep(1)
             
     except KeyboardInterrupt:
-        print("\\nExiting_*_*_*_*_*_")
+        print("\nExiting_*_*_*_*_*_")
         time.sleep(1)
 
 
@@ -254,7 +254,8 @@ def display_banner():
     
     print("\033[1;32m")
     print("\033[1;32m")
-    print("\033[1;34m          Created By W1nterFr3ak\033[0m")
+    print("\033[1;34m          Created By Winter\033[0m")
+     print("\033[1;34m         Fixed By Tricetech\033[0m")
     print("\033[2;32m     Winter says Parrot is awesome\033[0m")
     print("\033[1;32m   Mail: WinterFreak@protonmail.com\033[0m")
     print()
@@ -282,10 +283,10 @@ def validate_dependencies():
         missing_deps.append("lolcat")
     
     if missing_deps:
-        print("\\033[1;33mWarning: The following dependencies are missing:\\033[0m")
+        print("\033[1;33mWarning: The following dependencies are missing:\033[0m")
         for dep in missing_deps:
             print(f"  - {dep}")
-        print("\\033[1;33mInstall them with: pkg install toilet lolcat\\033[0m")
+        print("\033[1;33mInstall them with: pkg install toilet lolcat\033[0m")
         print()
         
         response = input("Continue anyway? (y/N): ").strip().lower()
@@ -295,7 +296,7 @@ def validate_dependencies():
     else:
         # Check and potentially install toilet-fonts
         available_fonts = check_toilet_fonts_package()
-        print(f"\\033[1;36mDetected {len(available_fonts)} available toilet fonts\\033[0m")
+        print(f"\033[1;36mDetected {len(available_fonts)} available toilet fonts\033[0m")
         return available_fonts
     
     return get_available_fonts()
@@ -311,8 +312,8 @@ def main():
     rev = args['revert']
     
     if rev and parrot:
-        print("\\033[1;32m              !!! CHOOSE ONE OPTION !!!\\033[0m")
-        print("\\n\\n")
+        print("\033[1;32m              !!! CHOOSE ONE OPTION !!!\033[0m")
+        print("\n\n")
         parser.print_help()
         
     elif parrot:
@@ -321,7 +322,7 @@ def main():
         if len(name) > 0:
             # Validate name (basic sanitization)
             if not name.replace(' ', '').replace('-', '').replace('_', '').isalnum():
-                print("\\033[1;31mError: Name should contain only alphanumeric characters, spaces, hyphens, and underscores\\033[0m")
+                print("\033[1;31mError: Name should contain only alphanumeric characters, spaces, hyphens, and underscores\033[0m")
                 sys.exit(1)
             
             form = choose_filter()
@@ -339,7 +340,7 @@ def main():
                 form = "gay"
                 TermColor(name, form)
         else:
-            print("\\033[1;32m!!! Please rerun the script and input the name to be displayed !!!\\033[0m")
+            print("\033[1;32m!!! Please rerun the script and input the name to be displayed !!!\033[0m")
             sys.exit(1)
             
     elif rev:
@@ -352,8 +353,8 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\\n\\033[1;33mScript interrupted by user\\033[0m")
+        print("\n\033[1;33mScript interrupted by user\033[0m")
         sys.exit(0)
     except Exception as e:
-        print(f"\\033[1;31mUnexpected error: {e}\\033[0m")
+        print(f"\033[1;31mUnexpected error: {e}\033[0m")
         sys.exit(1)
