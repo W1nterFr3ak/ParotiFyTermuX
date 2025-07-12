@@ -16,6 +16,22 @@ def get_parser():
     pars.add_argument('--revert', '-r', help='Revert to normal look', action="store_true")
     return parser
 
+def is_parrotified():
+    """Check if .bashrc is already parrotified"""
+    filename = str(Path.home()) + "/.bashrc"
+    if not os.path.exists(filename):
+        return False
+    
+    try:
+        with open(filename, 'r') as f:
+            content = f.read()
+        # Check for Parrotify-specific toilet command and PS1 prompt
+        if 'toilet -f' in content and "PS1='[\\033[01;34m]┌──[\\033[01;32m]" in content:
+            return True
+    except IOError:
+        print("\033[1;33mWarning: Could not read .bashrc to check parrotification\033[0m")
+    return False
+
 def get_available_fonts():
     """Get list of available toilet fonts, using cache if available"""
     font_cache = str(Path.home()) + "/.parrotifyfonts"
@@ -114,7 +130,14 @@ def check_toilet_fonts_package():
     return available_fonts
 
 def TermColor(name, filt):
-    """Apply terminal customization"""
+    """Apply terminal customization with centered text and random font selection"""
+    if is_parrotified():
+        print("\033[1;33mWarning: Terminal is already parrotified!\033[0m")
+        response = input("\033[1;36mOverwrite existing .bashrc and its backup? (y/N): \033[0m").strip().lower()
+        if response not in ['y', 'yes']:
+            print("\033[1;32mExiting without changes.\033[0m")
+            sys.exit(0)
+    
     available_fonts = get_available_fonts()
     
     if not available_fonts:
@@ -137,35 +160,51 @@ def TermColor(name, filt):
     
     filename = str(Path.home()) + "/.bashrc"
     backup_file = filename + ".backup"
+    font_cache = str(Path.home()) + "/.parrotifyfonts"
     
     try:
         if os.path.exists(filename):
             os.system(f"cp {filename} {backup_file}")
             print(f"\033[1;32mBacked up .bashrc to {backup_file}\033[0m")
         
+        # Test a random font to ensure it works with the filter
+        selected_font = random.choice(available_fonts)
+        print(f"\033[1;32mTesting font: {selected_font}\033[0m")
+        try:
+            test_result = subprocess.run(
+                ['toilet', '-f', selected_font, f'--{filt}', name, '-t'],
+                capture_output=True, text=True, timeout=0.5
+            )
+            if test_result.returncode != 0:
+                print(f"\033[1;33mWarning: Font {selected_font} with filter {filt} failed: {test_result.stderr}\033[0m")
+                sys.exit(1)
+            else:
+                print(f"\033[1;32mFont {selected_font} test passed\033[0m")
+        except subprocess.TimeoutExpired:
+            print(f"\033[1;33mWarning: Font {selected_font} timed out\033[0m")
+            sys.exit(1)
+        except subprocess.SubprocessError as e:
+            print(f"\033[1;33mWarning: Error testing font {selected_font}: {e}\033[0m")
+            sys.exit(1)
+        
+        # Write .bashrc with random font selection
         with open(filename, "w") as new:
-            selected_font = random.choice(available_fonts)
-            print(f"\033[1;32mUsing font: {selected_font}\033[0m")
-            
-            try:
-                test_result = subprocess.run(
-                    ['toilet', '-f', selected_font, f'--{filt}', name, '-t'],
-                    capture_output=True, text=True, timeout=0.5
-                )
-                if test_result.returncode != 0:
-                    print(f"\033[1;33mWarning: Font {selected_font} with filter {filt} failed: {test_result.stderr}\033[0m")
-                    sys.exit(1)
-                else:
-                    print(f"\033[1;32mFont {selected_font} test passed\033[0m")
-            except subprocess.TimeoutExpired:
-                print(f"\033[1;33mWarning: Font {selected_font} timed out\033[0m")
-                sys.exit(1)
-            except subprocess.SubprocessError as e:
-                print(f"\033[1;33mWarning: Error testing font {selected_font}: {e}\033[0m")
-                sys.exit(1)
-            
             username = os.getenv("USER", "user")
-            new.write(f"""toilet -f {selected_font} --{filt} {name} -t | lolcat
+            new.write(f"""#!/bin/bash
+# Load fonts from cache
+FONT_CACHE="{font_cache}"
+if [ -f "$FONT_CACHE" ]; then
+    FONTS=($(cat "$FONT_CACHE" | jq -r '.[]'))
+    FONT_COUNT=${{#FONTS[@]}}
+    if [ $FONT_COUNT -gt 0 ]; then
+        RANDOM_FONT=${{FONTS[$RANDOM % $FONT_COUNT]}}
+        toilet -f "$RANDOM_FONT" --{filt} "{name}" -t | lolcat
+    else
+        echo "No fonts available in $FONT_CACHE"
+    fi
+else
+    echo "Font cache not found: $FONT_CACHE"
+fi
 PS1='\\[\\033[01;34m\\]┌──\\[\\033[01;32m\\]{username}\\[\\033[01;34m\\]@\\[\\033[01;31m\\]\\h\\[\\033[00;34m\\]\\[\\033[01;34m\\]\\w\\[\\033[00;34m\\]\\[\\033[01;32m\\]:
 \\[\\033[01;34m\\]└╼\\[\\033[01;31m\\]#\\[\\033[01;32m\\]'
 """)
@@ -281,6 +320,7 @@ def validate_dependencies():
     missing_deps = []
     toilet_path = "/data/data/com.termux/files/usr/bin/toilet"
     lolcat_path = "/data/data/com.termux/files/usr/bin/lolcat"
+    jq_path = "/data/data/com.termux/files/usr/bin/jq"
     
     if not os.path.exists(toilet_path):
         missing_deps.append("toilet")
@@ -301,6 +341,11 @@ def validate_dependencies():
             missing_deps.append("lolcat")
     else:
         print("\033[1;32mFound lolcat at {}\033[0m".format(lolcat_path))
+    
+    if not os.path.exists(jq_path):
+        missing_deps.append("jq")
+    else:
+        print("\033[1;32mFound jq at {}\033[0m".format(jq_path))
     
     if missing_deps:
         print("\033[1;33mWarning: Missing dependencies: {}\033[0m".format(", ".join(missing_deps)))
