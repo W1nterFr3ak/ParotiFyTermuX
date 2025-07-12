@@ -359,8 +359,8 @@ def validate_dependencies():
     
     if not os.path.exists(toilet_path):
         missing_deps.append("toilet")
-    else:
-        # print("\033[1;32mFound toilet at {}\033[0m".format(toilet_path))
+    # else:
+    # print("\033[1;32mFound toilet at {}\033[0m".format(toilet_path))
     
     if not os.path.exists(lolcat_path):
         try:
@@ -374,13 +374,13 @@ def validate_dependencies():
             missing_deps.append("lolcat")
         except subprocess.SubprocessError:
             missing_deps.append("lolcat")
-    else:
-        # print("\033[1;32mFound lolcat at {}\033[0m".format(lolcat_path))
+    #else:
+    # print("\033[1;32mFound lolcat at {}\033[0m".format(lolcat_path))
     
     if not os.path.exists(jq_path):
         missing_deps.append("jq")
-    else:
-        # print("\033[1;32mFound jq at {}\033[0m".format(jq_path))
+    #else:
+    # print("\033[1;32mFound jq at {}\033[0m".format(jq_path))
     
     if missing_deps:
         print("\033[1;33mWarning: Missing dependencies: {}\033[0m".format(", ".join(missing_deps)))
