@@ -42,7 +42,7 @@ def get_available_fonts():
         try:
             with open(font_cache, 'r') as f:
                 available_fonts = json.load(f)
-            print("\033[1;36mLoaded fonts from cache: {}\033[0m".format(", ".join(available_fonts)))
+            #print("\033[1;36mLoaded fonts from cache: {}\033[0m".format(", ".join(available_fonts)))
             # Verify cached fonts are still valid
             valid_fonts = []
             for font in available_fonts:
