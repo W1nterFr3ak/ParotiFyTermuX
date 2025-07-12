@@ -255,7 +255,7 @@ def display_banner():
     print("\033[1;32m")
     print("\033[1;32m")
     print("\033[1;34m          Created By Winter\033[0m")
-     print("\033[1;34m         Fixed By Tricetech\033[0m")
+    print("\033[1;34m         Fixed By Tricetech\033[0m")
     print("\033[2;32m     Winter says Parrot is awesome\033[0m")
     print("\033[1;32m   Mail: WinterFreak@protonmail.com\033[0m")
     print()
