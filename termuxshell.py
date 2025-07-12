@@ -306,18 +306,32 @@ def reversify():
     print("\033[1;32m[-] Revert was successful!restart your terminal.\033[0m")
 
 def display_banner():
-    """Display the main ASCII art banner"""
     os.system("clear")
     print("\033[1;31m")
 
+    # Get terminal width
+    terminal_width = shutil.get_terminal_size((80, 20)).columns
+
     fonts = get_available_fonts()
-    selected_font = random.choice(fonts) if fonts else None
-    print(f"\033[1;36mDisplaying banner with font: {selected_font}\033[0m")
+    safe_fonts = []
+
+    # Filter fonts that fit in the terminal width
+    for font in fonts:
+        fig = Figlet(font=font)
+        rendered = fig.renderText("PAR0tifyTerm")
+        if all(len(line) <= terminal_width for line in rendered.splitlines()):
+            safe_fonts.append(font)
+
+    # Select from safe fonts
+    selected_font = random.choice(safe_fonts) if safe_fonts else None
+    print(f"\033[1;36mUsing font: {selected_font or 'fallback'}\033[0m")
 
     try:
-        figlet = Figlet(font=selected_font)
-        ascii_art = figlet.renderText("PAR0tifyTerm")
-        print(f"\033[1;35m{ascii_art}\033[0m")
+        if selected_font:
+            figlet = Figlet(font=selected_font, width=terminal_width)
+            print(f"\033[1;35m{figlet.renderText('PAR0tifyTerm')}\033[0m")
+        else:
+            raise ValueError("No fitting fonts")
     except Exception as e:
         print(f"\033[1;33mFallback banner (pyfiglet failed: {e})\033[0m")
         print_ascii_banner()
