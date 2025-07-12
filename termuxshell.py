@@ -129,8 +129,30 @@ def check_toilet_fonts_package():
     
     return available_fonts
 
+def choose_font(available_fonts):
+    """Prompt user to select a font or random option"""
+    print("\n")
+    print("\033[1;34mSelect a font or choose random:\033[0m")
+    print("\033[1;34m  0) Random (select a random font each time)\033[0m")
+    for i, font in enumerate(available_fonts, 1):
+        print(f"\033[1;34m  {i}) {font}\033[0m")
+    print("\n")
+    
+    while True:
+        choice = input("Enter font number (default: 0): ").strip()
+        if choice == '' or choice == '0':
+            return None  # None indicates random font selection
+        try:
+            choice = int(choice)
+            if 1 <= choice <= len(available_fonts):
+                return available_fonts[choice - 1]
+            else:
+                print(f"\033[1;33mPlease enter a number between 0 and {len(available_fonts)}\033[0m")
+        except ValueError:
+            print("\033[1;33mPlease enter a valid number\033[0m")
+
 def TermColor(name, filt):
-    """Apply terminal customization with centered text and random font selection"""
+    """Apply terminal customization with centered text and user-selected or random font"""
     if is_parrotified():
         print("\033[1;33mWarning: Terminal is already parrotified!\033[0m")
         response = input("\033[1;36mOverwrite existing .bashrc and its backup? (y/N): \033[0m").strip().lower()
@@ -145,6 +167,9 @@ def TermColor(name, filt):
         sys.exit(1)
     
     print(f"\033[1;36mAvailable fonts: {', '.join(available_fonts)}\033[0m")
+    
+    # Prompt for font selection
+    selected_font = choose_font(available_fonts)
     
     motd_path = "/data/data/com.termux/files/usr/etc/motd"
     motd_backup = "/data/data/com.termux/files/usr/etc/motdback"
@@ -167,30 +192,39 @@ def TermColor(name, filt):
             os.system(f"cp {filename} {backup_file}")
             print(f"\033[1;32mBacked up .bashrc to {backup_file}\033[0m")
         
-        # Test a random font to ensure it works with the filter
-        selected_font = random.choice(available_fonts)
-        print(f"\033[1;32mTesting font: {selected_font}\033[0m")
+        # Test the selected font (or a random one if random option chosen)
+        test_font = selected_font if selected_font else random.choice(available_fonts)
+        print(f"\033[1;32mTesting font: {test_font}\033[0m")
         try:
             test_result = subprocess.run(
-                ['toilet', '-f', selected_font, f'--{filt}', name, '-t'],
+                ['toilet', '-f', test_font, f'--{filt}', name, '-t'],
                 capture_output=True, text=True, timeout=0.5
             )
             if test_result.returncode != 0:
-                print(f"\033[1;33mWarning: Font {selected_font} with filter {filt} failed: {test_result.stderr}\033[0m")
+                print(f"\033[1;33mWarning: Font {test_font} with filter {filt} failed: {test_result.stderr}\033[0m")
                 sys.exit(1)
             else:
-                print(f"\033[1;32mFont {selected_font} test passed\033[0m")
+                print(f"\033[1;32mFont {test_font} test passed\033[0m")
         except subprocess.TimeoutExpired:
-            print(f"\033[1;33mWarning: Font {selected_font} timed out\033[0m")
+            print(f"\033[1;33mWarning: Font {test_font} timed out\033[0m")
             sys.exit(1)
         except subprocess.SubprocessError as e:
-            print(f"\033[1;33mWarning: Error testing font {selected_font}: {e}\033[0m")
+            print(f"\033[1;33mWarning: Error testing font {test_font}: {e}\033[0m")
             sys.exit(1)
         
-        # Write .bashrc with random font selection
+        # Write .bashrc based on font choice
         with open(filename, "w") as new:
             username = os.getenv("USER", "user")
-            new.write(f"""#!/bin/bash
+            if selected_font:
+                # Use specific font
+                new.write(f"""#!/bin/bash
+toilet -f "{selected_font}" --{filt} "{name}" -t | lolcat
+PS1='\\[\\033[01;34m\\]┌──\\[\\033[01;32m\\]{username}\\[\\033[01;34m\\]@\\[\\033[01;31m\\]\\h\\[\\033[00;34m\\]\\[\\033[01;34m\\]\\w\\[\\033[00;34m\\]\\[\\033[01;32m\\]:
+\\[\\033[01;34m\\]└╼\\[\\033[01;31m\\]#\\[\\033[01;32m\\]'
+""")
+            else:
+                # Use random font selection
+                new.write(f"""#!/bin/bash
 # Load fonts from cache
 FONT_CACHE="{font_cache}"
 if [ -f "$FONT_CACHE" ]; then
