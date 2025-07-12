@@ -120,7 +120,7 @@ def check_toilet_fonts_package():
         print("\033[1;33m" + "="*60 + "\033[0m")
         sys.exit(1)
     
-    print("\033[1;36mAvailable fonts: {}\033[0m".format(", ".join(available_fonts)))
+    #print("\033[1;36mAvailable fonts: {}\033[0m".format(", ".join(available_fonts)))
     if len(available_fonts) <= 5:
         print("\033[1;33m" + "="*60 + "\033[0m")
         print("\033[1;33mLimited fonts detected in Termux.\033[0m")
