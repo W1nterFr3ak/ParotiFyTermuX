@@ -21,6 +21,10 @@ def get_parser():
 def is_parrotified():
     """Check if .bashrc is already parrotified"""
     filename = str(Path.home()) + "/.bashrc"
+    backup_file = filename + ".backup"
+    font_cache = str(Path.home()) + "/.parrotifyfonts"
+    motd_path = "/data/data/com.termux/files/usr/etc/motd"
+    motd_backup = "/data/data/com.termux/files/usr/etc/motdback"
     if not os.path.exists(filename):
         return False
     
