@@ -2,6 +2,7 @@
 import os
 import sys
 import time
+import shutil
 import argparse
 from pathlib import Path
 import re
@@ -337,7 +338,7 @@ def display_banner():
         print_ascii_banner()
 
     print("\033[1;32m")
-    print("\033[1;34m          Created By Winter and Fixed by Tricetech\033[0m")
+    print("\033[1;34m       Created By Winter and Fixed by Tricetech\033[0m")
     print("\033[2;32m     Winter says Parrot is awesome ..  enjoy\033[0m")
     print("\033[1;32m   Mail: winterfreak@protonmail.com\033[0m")
     print()
