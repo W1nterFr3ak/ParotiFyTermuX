@@ -28,7 +28,7 @@ def is_parrotified():
         with open(filename, 'r') as f:
             content = f.read()
         # Check for Parrotify-specific toilet command and PS1 prompt
-        if 'toilet -f' in content and "PS1='[\\033[01;34m]┌──[\\033[01;32m]" in content:
+        if 'parrotified_true" in content:
             return True
     except IOError:
         print("\033[1;33mWarning: Could not read .bashrc to check parrotification\033[0m")
@@ -156,11 +156,7 @@ def choose_font(available_fonts):
 def TermColor(name, filt):
     """Apply terminal customization with centered text and user-selected or random font"""
     if is_parrotified():
-        print("\033[1;33mWarning: Terminal is already parrotified!\033[0m")
-        response = input("\033[1;36mOverwrite existing .bashrc and its backup? (y/N): \033[0m").strip().lower()
-        if response not in ['y', 'yes']:
-            print("\033[1;32mExiting without changes.\033[0m")
-            sys.exit(0)
+        reversify()
     
     available_fonts = get_available_fonts()
     
@@ -220,6 +216,7 @@ def TermColor(name, filt):
             if selected_font:
                 # Use specific font
                 new.write(f"""#!/bin/bash
+# parrotified_true
 toilet -f "{selected_font}" --{filt} "{username}" -t | lolcat
 PS1='\\[\\033[01;34m\\]┌──\\[\\033[01;32m\\]{username}\\[\\033[01;34m\\]@\\[\\033[01;31m\\]\\h\\[\\033[00;34m\\]\\[\\033[01;34m\\]\\w\\[\\033[00;34m\\]\\[\\033[01;32m\\]:
 \\[\\033[01;34m\\]└╼\\[\\033[01;31m\\]#\\[\\033[01;32m\\]'
