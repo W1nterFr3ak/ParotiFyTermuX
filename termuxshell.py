@@ -8,6 +8,7 @@ import re
 import random
 import subprocess
 import json
+from pyfiglet import Figlet, FigletFont
 
 def get_parser():
     parser = argparse.ArgumentParser(description='Parrotify Terminal - Make your terminal look like Parrot OS')
@@ -305,42 +306,28 @@ def reversify():
     print("\033[1;32m[-] Revert was successful!restart your terminal.\033[0m")
 
 def display_banner():
-
-    """Display the main banner"""
-    available_fonts = get_available_fonts()
-    
+    """Display the main ASCII art banner"""
     os.system("clear")
     print("\033[1;31m")
-    
-    toilet_path = "/data/data/com.termux/files/usr/bin/toilet"
-    if os.path.exists(toilet_path) and available_fonts:
-        selected_font = random.choice(available_fonts)
-        print(f"\033[1;36mDisplaying banner with font: {selected_font}\033[0m")
-        try:
-            result = subprocess.run(
-                ['toilet', '-t', '-f', selected_font, '--gay', 'PAR0tifyTerm'],
-                capture_output=True, text=True, timeout=1
-            )
-            if result.returncode != 0:
-                print("\033[1;33mFallback banner (toilet command failed: {})\033[0m".format(result.stderr))
-                print_ascii_banner()
-            else:
-                print(result.stdout)
-        except subprocess.TimeoutExpired:
-            print("\033[1;33mFallback banner (toilet command timed out)\033[0m")
-            print_ascii_banner()
-        except subprocess.SubprocessError as e:
-            print(f"\033[1;33mFallback banner (toilet command error: {e})\033[0m")
-            print_ascii_banner()
-    else:
-        print("\033[1;33mFallback banner (toilet not found or no fonts)\033[0m")
+
+    fonts = get_available_fonts()
+    selected_font = random.choice(fonts) if fonts else None
+    print(f"\033[1;36mDisplaying banner with font: {selected_font}\033[0m")
+
+    try:
+        figlet = Figlet(font=selected_font)
+        ascii_art = figlet.renderText("PAR0tifyTerm")
+        print(f"\033[1;35m{ascii_art}\033[0m")
+    except Exception as e:
+        print(f"\033[1;33mFallback banner (pyfiglet failed: {e})\033[0m")
         print_ascii_banner()
+
     print("\033[1;32m")
     print("\033[1;34m          Created By Winter and Fixed by Tricetech\033[0m")
     print("\033[2;32m     Winter says Parrot is awesome ..  enjoy\033[0m")
     print("\033[1;32m   Mail: winterfreak@protonmail.com\033[0m")
     print()
-
+    
 def print_ascii_banner():
     """Print ASCII art banner as fallback"""
     print("██████╗  █████╗ ██████╗  ██████╗ ████████╗██╗███████╗██╗   ██╗")
