@@ -28,7 +28,7 @@ def is_parrotified():
         with open(filename, 'r') as f:
             content = f.read()
         # Check for Parrotify-specific toilet command and PS1 prompt
-        if "parrotified_true" in content:
+        if content.find("parrotified_true"):
             return True
     except IOError:
         print("\033[1;33mWarning: Could not read .bashrc to check parrotification\033[0m")
@@ -224,6 +224,7 @@ PS1='\\[\\033[01;34m\\]┌──\\[\\033[01;32m\\]{username}\\[\\033[01;34m\\]@\
             else:
                 # Use random font selection
                 new.write(f"""#!/bin/bash
+# parrotified_true
 # Load fonts from cache
 FONT_CACHE="{font_cache}"
 if [ -f "$FONT_CACHE" ]; then
