@@ -285,8 +285,8 @@ def reversify():
         elif os.path.exists(filename):
             os.remove(filename)
             #print("\033[1;32mRemoved custom .bashrc\033[0m")
-        else:
-            #print("\033[1;32mNo custom .bashrc found\033[0m")
+        #else:
+        #print("\033[1;32mNo custom .bashrc found\033[0m")
         print("\033[1;32mParrotify Removed Terminal Restored\033[0m")
     except OSError as e:
         print(f"\033[1;33mError handling .bashrc: {e}\033[0m")
@@ -295,8 +295,8 @@ def reversify():
         if os.path.exists(font_cache):
             os.remove(font_cache)
             # print("\033[1;32mRemoved font cache {}\033[0m".format(font_cache))
-        else:
-            # print("\033[1;36mNo font cache found\033[0m")
+        #else:
+        # print("\033[1;36mNo font cache found\033[0m")
     except OSError as e:
         print(f"\033[1;33mError removing font cache: {e}\033[0m")
     
