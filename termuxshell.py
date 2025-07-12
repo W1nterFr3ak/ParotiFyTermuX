@@ -237,7 +237,7 @@ def display_banner():
     available_fonts = get_available_fonts()
     
     os.system("clear")
-    print("\\033[1;31m")
+    print("\033[1;31m")
     
     # Check if toilet command exists
     if os.system("which toilet > /dev/null 2>&1") == 0:
@@ -246,19 +246,18 @@ def display_banner():
         
         # If banner failed, use ASCII fallback
         if banner_result != 0:
-            print("\\033[1;33mFallback banner (toilet command failed):\\033[0m")
+            print("\033[1;33mFallback banner (toilet command failed):\033[0m")
             print_ascii_banner()
     else:
-        print("\\033[1;33mFallback banner (toilet not found):\\033[0m")
+        print("\033[1;33mFallback banner (toilet not found):\033[0m")
         print_ascii_banner()
     
-    print("\\033[1;32m")
-    print("\\033[1;32m")
-    print("\\033[1;34m          Created By W1nterFr3ak\\033[0m")
-    print("\\033[2;32m     Winter says Parrot is awesome\\033[0m")
-    print("\\033[1;32m   Mail: WinterFreak@protonmail.com\\033[0m")
+    print("\033[1;32m")
+    print("\033[1;32m")
+    print("\033[1;34m          Created By W1nterFr3ak\033[0m")
+    print("\033[2;32m     Winter says Parrot is awesome\033[0m")
+    print("\033[1;32m   Mail: WinterFreak@protonmail.com\033[0m")
     print()
-
 
 def print_ascii_banner():
     """Print ASCII art banner as fallback"""
