@@ -214,12 +214,12 @@ def TermColor(name, filt):
         
         # Write .bashrc based on font choice
         with open(filename, "w") as new:
-            username = os.getenv("USER", "user")
+            username = name #os.getenv("USER", "user")
             if selected_font:
                 # Use specific font
                 new.write(f"""#!/bin/bash
-toilet -f "{selected_font}" --{filt} "{name}" -t | lolcat
-PS1='\\[\\033[01;34m\\]┌──\\[\\033[01;32m\\]{name}\\[\\033[01;34m\\]@\\[\\033[01;31m\\]\\h\\[\\033[00;34m\\]\\[\\033[01;34m\\]\\w\\[\\033[00;34m\\]\\[\\033[01;32m\\]:
+toilet -f "{selected_font}" --{filt} "{username}" -t | lolcat
+PS1='\\[\\033[01;34m\\]┌──\\[\\033[01;32m\\]{username}\\[\\033[01;34m\\]@\\[\\033[01;31m\\]\\h\\[\\033[00;34m\\]\\[\\033[01;34m\\]\\w\\[\\033[00;34m\\]\\[\\033[01;32m\\]:
 \\[\\033[01;34m\\]└╼\\[\\033[01;31m\\]#\\[\\033[01;32m\\]'
 """)
             else:
@@ -239,7 +239,7 @@ if [ -f "$FONT_CACHE" ]; then
 else
     echo "Font cache not found: $FONT_CACHE"
 fi
-PS1='\\[\\033[01;34m\\]┌──\\[\\033[01;32m\\]{name}\\[\\033[01;34m\\]@\\[\\033[01;31m\\]\\h\\[\\033[00;34m\\]\\[\\033[01;34m\\]\\w\\[\\033[00;34m\\]\\[\\033[01;32m\\]:
+PS1='\\[\\033[01;34m\\]┌──\\[\\033[01;32m\\]{username}\\[\\033[01;34m\\]@\\[\\033[01;31m\\]\\h\\[\\033[00;34m\\]\\[\\033[01;34m\\]\\w\\[\\033[00;34m\\]\\[\\033[01;32m\\]:
 \\[\\033[01;34m\\]└╼\\[\\033[01;31m\\]#\\[\\033[01;32m\\]'
 """)
         print("\n")
